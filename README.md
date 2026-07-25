@@ -13,5 +13,5 @@
 | `dev_liquid/` | リキッドレイアウト（基本） |
 | `dev/` | px 固定レイアウト |
 | `wordpress初期設定/` | WP テーマ PHP 雛形 |
-| `prompts/` | Playwright MCP 等の AI 依頼テンプレート |
+| `prompts/` | Figma / Playwright MCP 等の AI 依頼テンプレート |
 | `.cursor/rules/` | AI 用コーディング規約 |

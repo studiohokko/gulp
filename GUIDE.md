@@ -21,6 +21,7 @@
   - [ACF](#acfhtmljson)
 - [AI の使い方](#ai-の使い方)
 - [Playwright MCP（WordPress 管理画面）](#playwright-mcpwordpress-管理画面)
+- [Figma MCP + Playwright MCP](#figma-mcp--playwright-mcp)
 - [`.cursor/rules/` の中身](#cursorrules-の中身)
 - [クイックリファレンス](#クイックリファレンス)
 
@@ -49,7 +50,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 | **`dev/`** | px 固定レイアウト用 Gulp 環境 | リキッドを使わない案件のみ |
 | **`wordpress初期設定/`** | WP テーマ用 PHP 雛形 | WP 案件開始時 |
 | **`.cursor/rules/`** | AI 用コーディング規約 | Cursor で GULP / テーマを開いたとき |
-| **`prompts/`** | Playwright MCP 等の AI 依頼テンプレート | WP 管理画面を AI に操作させるとき |
+| **`prompts/`** | Figma / Playwright MCP 等の AI 依頼テンプレート | WP 管理画面・Figma 連携を AI に任せるとき |
 | **`案件開始フロー.md`** | 案件開始時の手順 | 新規案件のセットアップ |
 | **`公開・移行フロー.md`** | 本番公開・移行時の手順 | AIOM エクスポート前 |
 | **`GUIDE.md`** | このファイル | 着手後のコーディング |
@@ -95,7 +96,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 - **`html.json`** → メイン（`.html` / `.php` 両方で使用。`scope: html,php` 設定済み）
 - **`scss.json`** → `.scss` で効く
 - **`javascript.json`** → `.js` で効く
-- **`markdown.json`** → `.md` で効く（`wp-playwright` = Playwright MCP 依頼テンプレ）
+- **`markdown.json`** → `.md` で効く（`wp-playwright` / `figma-text` / `figma-page` / `figma-playwright`）
 - **`php.json`** → 未使用（`html.json` に統一）
 
 ### 汎用 HTML
@@ -251,6 +252,23 @@ Local の wp-admin（固定ページ + AIOSEO 等）を AI に操作させると
 
 ---
 
+## Figma MCP + Playwright MCP
+
+Figma から文言・ページ名・スラッグを取得し、コード入力や固定ページ作成、Local 表示確認まで AI に任せるとき → **`prompts/figma-playwright.md`** を開き、`【】` を書き換えて Agent チャットにコピペ。
+
+| やりたいこと | テンプレのセクション | スニペット |
+|---|---|---|
+| Figma 文言 → PHP/HTML | A | `figma-text` |
+| Figma → 固定ページ作成 | B | `figma-page` |
+| 文言入力 → 表示確認 | C | `figma-playwright` |
+
+- 前提: Figma MCP 認証済み・Playwright MCP 追加済み・Local 起動中
+- Figma URL は **`node-id` 付き**（フレーム選択 → Copy link）
+
+詳細・短縮版・向き不向きはテンプレートファイル内に記載。
+
+---
+
 ## `.cursor/rules/` の中身
 
 | ファイル | 用途 |
@@ -275,6 +293,7 @@ WP 案件             → dev_liquid + wordpress初期設定 + BS_PROXY あり
 LP / 静的           → dev_liquid or dev + BS_PROXY 空
 CF7                 → スニペット cf7-* → CF7 管理画面へコピー
 ACF                 → スニペット acf-* または AI に PHP だけ依頼
-WP 管理画面（AI）   → prompts/wp-admin-playwright.md（詳細は同ファイル内）
+WP 管理画面（AI）   → prompts/wp-admin-playwright.md
+Figma + 表示確認   → prompts/figma-playwright.md
 着手後・忘れた      → この GUIDE.md
 ```
