@@ -1,0 +1,78 @@
+@use 'sass:map';
+@use './variables' as *;
+
+// -----------------------------------------------------------
+//  ブレイクポイント
+// -----------------------------------------------------------
+// レスポンシブベース設定（"sp" or "pc"）
+$responsiveBase: sp;
+
+// ブレークポイント定義（variable.scssの値を使用）
+$breakpoints: (
+	sp: $breakpoint - 1,
+	md: $md-breakpoint,
+	pc: $breakpoint,
+	tb: $tb-breakpoint - 1,
+	lg: $pc-inner-sum,
+);
+
+// メディアクエリマップ生成
+$mediaqueries: ();
+
+@if $responsiveBase == sp {
+	// SPファースト（min-width ベース）
+	$mediaqueries: (
+		sp: "(max-width: #{map.get($breakpoints, 'sp')}px)",
+		md: "(min-width: #{map.get($breakpoints, 'md')}px)",
+		pc: "(min-width: #{map.get($breakpoints, 'pc')}px)",
+		tb: "(max-width: #{map.get($breakpoints, 'tb')}px) and (min-width: #{map.get($breakpoints, 'pc')}px)",
+		lg: "(min-width: #{map.get($breakpoints, 'lg')}px)",
+	);
+} @else {
+	// PCファースト（max-width ベース）
+	$mediaqueries: (
+		lg: "(width < #{map.get($breakpoints, 'lg')}px)",
+		tb: "(width < #{map.get($breakpoints, 'tb')}px) and (width >= #{map.get($breakpoints, 'pc')}px)",
+		pc: "(width < #{map.get($breakpoints, 'pc')}px)",
+		md: "(width < #{map.get($breakpoints, 'md')}px)",
+		sp: "(width <= #{map.get($breakpoints, 'sp')}px)",
+	);
+}
+
+// メディアクエリミックスイン（初期値はPC）
+@mixin mq($breakpoint: pc) {
+	@media #{map.get($mediaqueries, $breakpoint)} {
+		@content;
+	}
+}
+
+// -----------------------------------------------------------
+//  フォント情報
+// -----------------------------------------------------------
+// 一括指定
+@mixin font($size: null, $weight: null, $height: null, $spacing: null) {
+	@if $size {
+		font-size: max(calc($size / 16 * 1rem), calc($size * 0.8px));
+		@include mq(sp) {
+			font-size: calc($size / 16 * 1rem);
+		}
+	}
+	@if $weight {
+		font-weight: $weight;
+	}
+	@if $height {
+		line-height: calc($height / $size);
+	}
+	@if $spacing {
+		letter-spacing: calc($spacing / $size * 1em);
+	}
+}
+
+// -----------------------------------------------------------
+//  line-heightの上下の余白（ハーフ・レディング）を打ち消す
+// -----------------------------------------------------------
+$leading-trim: calc((1em - 1lh) / 2);
+
+@supports not (top: 1lh) {
+	$leading-trim: 0px;
+}

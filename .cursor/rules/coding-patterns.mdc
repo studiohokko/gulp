@@ -1,0 +1,343 @@
+---
+description: ドロワー・モーダル・アコーディオン・タブなどのUIパターン実装例、グリッドレスポンシブの計算ルール、スニペット準拠のHTML/SCSS/JSマークアップ例、WordPress初期設定の詳細。特定のUIパーツ（ドロワー、モーダル、アコーディオン、タブ、レスポンシブグリッド）を実装する時や、WordPressテーマの初期設定をする時に参照する。
+alwaysApply: false
+---
+
+# 実装パターン集
+
+`coding-guide.mdc` の命名規則・基本ルールを前提に、具体的な UI パターンの実装例をまとめる。
+
+---
+
+## レスポンシブ対応ルール
+
+### 横並びセクション
+- 横並びレイアウトは基本 `display: grid` を使用
+- 画像とテキストの横並びは、両者をパーセント指定で可変にする
+- それぞれの要素がデザインカンプサイズの **70%より小さくなる地点** でブレイクポイントを切り、縦並びに変更
+
+### gap の可変指定
+- grid に `gap` を指定する際、画面幅が「グリッド要素の幅 + sidePadding × 2」を下回ったタイミングで `gap` の値を半分にする
+- カラム数（2カラム・3カラム・4カラムなど）に関わらず同じルールを適用する
+- 分岐点は `grid` を指定している要素の `max-width`（または固定幅）と、外枠の `padding-inline` から計算する
+
+  ```scss
+  // 例：グリッド要素の幅 1200px、sidePadding 40px の場合
+  // 分岐点 = 1200 + 40 * 2 = 1280px
+
+  .p-section__grid--2col {
+    grid-template-columns: 1fr 1fr;
+    gap: rm(80);
+
+    @media (max-width: 1280px) {
+      gap: rm(40);
+    }
+  }
+  ```
+
+### グリッドカラムの比率指定
+- `grid-template-columns` で一方のカラムに固定幅（`rm()` など）を使うと崩れる原因になる
+- 固定幅カラムがある場合は、**外枠コンテナのコンテンツ幅**に対する比率を `calc()` で `%` 指定する
+
+  ```scss
+  // NG
+  grid-template-columns: rm(792) 1fr;
+
+  // OK：792 ÷ 1680 ≈ 47.14%
+  grid-template-columns: calc(792 / 1680 * 100%) 1fr;
+  ```
+
+### メディアクエリの記述場所
+- レスポンシブの記述は**各クラスの中**に書く（別ブロックにまとめない）
+  ```scss
+  .p-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    @include mq(sp) {
+      grid-template-columns: 1fr;
+    }
+  }
+  ```
+
+---
+
+## ドロワーの実装
+
+- SP のみ（`u-only__sp`）
+- 開閉: `#js_drawerOpen` + `.js_drawer` に `is_opened`
+- スクロールロック: `body.is_fixed` + `position: fixed` + `top` JS 制御
+- `inert` で背景操作防止（`aria-hidden` は使わない）
+- フォーカストラップ + Escape キーで閉じる
+- PC 幅（≥768px）にリサイズで強制クローズ
+
+```html
+<button id="js_drawerOpen" class="c-hamburger" type="button"
+  aria-controls="drawer" aria-expanded="false" aria-label="メニューを開く">
+  <span class="c-hamburger__line"></span>
+</button>
+
+<div id="drawer" class="p-drawer js_drawer" inert>...</div>
+```
+
+```scss
+.p-drawer {
+  translate: 100% 0;
+  opacity: 0;
+  visibility: hidden;
+  height: calc(100dvh - rm($sp-header-height));
+}
+.js_drawer.is_opened {
+  translate: 0;
+  opacity: 1;
+  visibility: visible;
+}
+```
+
+---
+
+## モーダルの実装
+
+- `<dialog>` タグではなく、`role="dialog"` を持つ div 要素を使用
+- オーバーレイ + 内部コンテンツの構造
+- アクセシビリティを考慮した実装にする
+
+```html
+<div class="p-shops__modal js_shopsMapModal" id="shop-map-modal1"
+     role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="p-shops__modalOverlay js_shopsMapClose" aria-label="閉じる"></button>
+  <div class="p-shops__modalInner">...</div>
+</div>
+<button class="p-shops__mapButton js_shopsMapOpen" aria-controls="shop-map-modal1">
+```
+
+```javascript
+// 開: is_opened + aria-hidden="false" + スクロールロック
+// 閉: Escape / オーバーレイクリック、フォーカス復帰
+// Tab フォーカストラップ
+```
+
+```scss
+.p-shops__modal {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  visibility: hidden;
+  pointer-events: none;
+}
+.p-shops__modal.is_opened {
+  visibility: visible;
+  pointer-events: auto;
+}
+```
+
+---
+
+## アコーディオンの実装
+
+- `<details>` / `<summary>` タグを使用
+- GSAP で `height: 0 ↔ auto`, `opacity` アニメ（0.8s, `power3.out`）
+- 状態判定は `open` 属性ではなく **`is_opened` クラス**（アニメタイミング安定のため）
+- `event.preventDefault()` で `<summary>` デフォルト動作を無効化
+
+```html
+<details class="p-qa-box js_details is_opened" open>
+  <summary class="p-qa-box__summary js_summary">
+    <span class="p-qa-box__title">質問テキスト</span>
+  </summary>
+  <div class="p-qa-box__content js_content">
+    <p class="p-qa-box__text">回答テキスト</p>
+  </div>
+</details>
+```
+
+```scss
+.js_details.is_opened .p-qa-box__q::after {
+  rotate: 180deg;  // 矢印回転
+}
+```
+
+---
+
+## タブの実装
+
+- WAI-ARIA tabs: `role="tablist"`, `role="tab"`, `role="tabpanel"`
+- 表示制御: `is_shown` クラス（CSS で `opacity` / `visibility` / `position`）
+- キーボード: ArrowLeft/Right, Home, End
+- CSS Grid でパネルを重ね、`is_shown` で切替
+
+---
+
+## WordPress 初期設定（`wordpress初期設定/`）
+
+新規テーマ作成時は `wordpress初期設定/` のファイルをテーマルートにコピーして使う。
+
+**同梱ファイル**
+- `functions.php`, `header.php`, `footer.php`, `front-page.php`, `style.css`
+- `template-parts/header.php`, `template-parts/footer.php` — 最小限のヘッダー・フッター雛形
+
+**含まれる設定（`functions.php`）**
+- `my_asset_version()` — ビルド成果物の `filemtime` によるキャッシュバスティング
+- `my_setup()` — 固定ページ抜粋、HTML5、title-tag、アイキャッチ
+- `my_script_init()` — Google Fonts / Swiper 12 / GSAP 3.15 / bundle.js の enqueue
+- `add_defer_attribute()` — JS に defer 付与
+- `auto_post_slug()` — 日本語スラッグ禁止
+- `change_post_label()` — 投稿タイプ名を「お知らせ」に変更
+- `img_uncompressed()` — JPEG 品質 100%
+
+**HTML シェル（`header.php` / `footer.php`）**
+```php
+<!DOCTYPE html>
+<html <?php language_attributes(); ?>>
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="format-detection" content="telephone=no, email=no, address=no">
+   <?php wp_head(); ?>
+</head>
+<body <?php body_class(); ?>>
+   <?php wp_body_open(); ?>
+```
+
+**ページテンプレートの基本形**
+```php
+<?php get_header(); ?>
+<?php get_template_part('template-parts/header'); ?>
+
+<main class="l-main">
+   <!-- コンテンツ -->
+</main>
+
+<?php get_template_part('template-parts/footer'); ?>
+<?php get_footer(); ?>
+```
+
+---
+
+## スニペット準拠のマークアップパターン
+
+Cursor / VS Code のユーザースニペット（`html.json`, `scss.json`, `javascript.json`）に合わせて記述する。
+
+### HTML セクション構成
+
+**基本セクション（`section`）**
+```html
+<section class="p-section">
+   <div class="p-section__inner l-inner">
+      <div class="p-section__content">
+         <!-- コンテンツ -->
+      </div>
+      <!-- /.p-section__content -->
+   </div>
+   <!-- /.p-section__inner-->
+</section>
+<!-- /.p-section -->
+```
+
+**見出し付きセクション（`section-h`）**
+```html
+<section class="p-section">
+   <div class="p-section__inner l-inner">
+      <div class="p-section__heading">...</div>
+      <!-- /.p-section__heading -->
+      <div class="p-section__content">...</div>
+      <!-- /.p-section__content -->
+   </div>
+   <!-- /.p-section__inner-->
+</section>
+```
+
+### 画像（PHP）
+
+**単一画像（`img-php`）**
+```html
+<img src='<?php echo esc_url(get_theme_file_uri('dev/public/assets/img/filename.webp')); ?>'
+   alt='' width='' height='' loading='lazy'>
+```
+
+**picture 切替（`picture-php`）**
+```html
+<picture>
+   <source srcset="<?php echo esc_url(get_theme_file_uri('dev/public/assets/img/filename.webp')); ?>"
+      media="(min-width: 768px)">
+   <img src='<?php echo esc_url(get_theme_file_uri('dev/public/assets/img/sp/filename.webp')); ?>'
+      alt='' width='' height='' loading='lazy'>
+</picture>
+```
+
+### 改行
+
+- SP のみ: `<br class="u-only__sp">`（`br-sp`）
+- PC のみ: `<br class="u-only__pc">`（`br-pc`）
+
+### 外部リンク
+
+- 属性のみ: `target="_blank" rel="nofollow noopener"`（`target`）
+- a タグ一式: `<a href="URL" target="_blank" rel="nofollow noopener">テキスト</a>`（`a_target`）
+
+### アコーディオン HTML（`accordion_faq`）
+
+```html
+<details class="p-qa-box js_details">
+   <summary class="p-qa-box__summary js_summary">
+      <span class="p-qa-box__q">
+         <span class="p-qa-box__q-text">質問</span>
+      </span>
+   </summary>
+   <div class="p-qa-box__content js_content">
+      <span class="p-qa-box__a">
+         <span class="p-qa-box__a-text">回答</span>
+      </span>
+   </div>
+</details>
+```
+
+### Swiper HTML（`swiper`）
+
+```html
+<div class="p-section__swiper-container">
+   <div class="swiper p-section__swiper">
+      <div class="swiper-wrapper p-section__swiper-wrapper">
+         <div class="swiper-slide p-section__swiper-slide">...</div>
+      </div>
+   </div>
+   <div class="swiper-pagination p-section__swiper-pagination"></div>
+   <button class="swiper-button-prev p-section__swiper-button-prev"></button>
+   <button class="swiper-button-next p-section__swiper-button-next"></button>
+</div>
+```
+
+### SCSS コメント（スニペット）
+
+| プレフィックス | 用途 |
+|---|---|
+| `cmt` | 大見出しコメント `// -----------------------------------------------------------` |
+| `cmtmin` | 中見出し `// ----------------------------` |
+| `cmtsmall` | 小見出し `// ========` |
+| `cmtjs` | JS 用クラス `// △▽△▽△▽△▽ JS用クラス` |
+| `mq` | レスポンシブ `// ******** responsive(pc)` + `@include mq(pc)` |
+
+### SCSS 論理プロパティ（スニペット）
+
+| プレフィックス | プロパティ |
+|---|---|
+| `maiauto` | `margin-inline: auto` |
+| `main` / `mains` / `maine` | `margin-inline` 系 |
+| `mab` / `mabs` / `mabe` | `margin-block` 系 |
+| `pain` / `pains` / `paine` | `padding-inline` 系 |
+| `pab` / `pabs` / `pabe` | `padding-block` 系 |
+| `hover` | `@media(any-hover: hover)` + `:focus-visible` セット |
+
+### JavaScript ファイル雛形
+
+```javascript
+// -----------------------------------------------------------
+//  機能名
+// -----------------------------------------------------------
+export function js_featureName() {
+   // ...
+}
+```
+
+- 新規 JS は `dev/src/assets/js/js_<機能名>.js` に作成
+- `main.js` で import → 即実行

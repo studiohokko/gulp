@@ -1,0 +1,54 @@
+@use '../global' as *;
+
+@if $responsiveBase == sp {
+	// 📱 SPファースト
+	.u-only__sp {
+		display: block;
+
+		// PC以上で非表示
+		@include mq(pc) {
+			display: none !important;
+		}
+	}
+
+	.u-only__pc {
+		display: none;
+
+		// PC以上で表示
+		@include mq(pc) {
+			display: block !important;
+		}
+	}
+} @else {
+	// 💻 PCファースト
+	.u-only__sp {
+		display: none;
+
+		// SP以下で表示
+		@include mq(sp) {
+			display: block !important;
+		}
+	}
+
+	.u-only__pc {
+		display: block;
+
+		// SP以下で非表示
+		@include mq(sp) {
+			display: none !important;
+		}
+	}
+}
+
+// 横長では非表示
+@media screen and (orientation: landscape) {
+	.u-only__portrait {
+		display: none !important;
+	}
+}
+// 縦長では非表示
+@media screen and (orientation: portrait) {
+	.u-only__landscape {
+		display: none !important;
+	}
+}

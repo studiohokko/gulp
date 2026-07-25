@@ -1,0 +1,15 @@
+@use '../global' as *;
+
+.l-header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: $z-header;
+	width: 100%;
+	height: rm($sp-header-height);
+
+	// ******** responsive(pc)
+	@include mq(pc) {
+		height: rm($pc-header-height);
+	}
+}

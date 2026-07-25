@@ -1,0 +1,547 @@
+---
+description: HTML / WordPress コーディングガイド（FLOCSS + BEM、Gulp/Webpack）
+alwaysApply: true
+---
+
+# HTML / WordPress コーディングガイド
+
+## プロジェクト概要
+
+WordPress テーマ（gulp-essentials ベース）のフロントエンド開発規約。
+FLOCSS + BEM 設計、Gulp + Webpack ビルド、SP ファーストのレスポンシブ構成。
+
+参照プロジェクト: `tokyo-brand`, `eight-corporate`
+
+> 特定の UI パターン（ドロワー・モーダル・アコーディオン・タブ・グリッドレスポンシブ・WP 初期設定詳細・スニペット準拠マークアップ例）は **`coding-patterns.mdc`** に分離。該当する実装をする時は自動的に参照される。
+
+---
+
+## GULP テンプレート（`~/Desktop/GULP/`）
+
+> 運用手順・スニペット一覧は **`GUIDE.md`** を参照。
+
+| フォルダ | 用途 |
+|---|---|
+| `dev_liquid/` | **リキッドレイアウト**（`rm()` + vw 可変）。WP / LP / 静的 HTML 共通の基本テンプレート |
+| `dev/` | **px 固定レイアウト**（`_base.scss` に vw なし）。リキッドを使わない案件用 |
+
+**BrowserSync（`dev_liquid` / `dev` 共通）**
+
+| `.env` の `BS_PROXY` | 用途 |
+|---|---|
+| Local URL あり | WordPress |
+| 空 | LP / 静的 HTML（`public/` 配信） |
+
+**新規 WP テーマ**
+1. `dev_liquid/` → テーマ内 **`dev/`** としてコピー
+2. `wordpress初期設定/` → テーマルートにコピー
+3. `.env` の `BS_PROXY` を Local URL に設定
+
+**新規 LP / 静的**
+1. `dev_liquid/` または `dev/` をコピー
+2. `.env` の `BS_PROXY` を空にする
+
+> テーマ内のアセットパスは常に **`dev/public/assets/`**。GULP 上の `dev_liquid` はコピー元の名前。
+
+---
+
+## 案件開始チェックリスト
+
+新規 WP 案件を始めるとき、以下を順に確認する。
+
+### 1. テンプレートのコピー
+
+**WordPress**
+- [ ] `dev_liquid/` → テーマ内 `dev/`
+- [ ] `wordpress初期設定/` → テーマルート
+- [ ] `.cursor/rules/` → テーマ内（テーマのみ Cursor で開く場合）
+- [ ] `BS_PROXY` = Local URL
+
+**LP / 静的 HTML**
+- [ ] `dev_liquid/`（リキッド）または `dev/`（px 固定）をコピー
+- [ ] `BS_PROXY` = 空
+
+**共通**
+- [ ] `npm install` → `npm run dev`
+
+### 2. `_variables.scss`（`dev/src/assets/scss/global/_variables.scss`）
+
+ファイル内の **【案件ごと】** コメント箇所を Figma に合わせて更新する。
+
+| 項目 | 例 |
+|---|---|
+| カンプ幅 | `$pc-camp`, `$sp-camp`（375 / 390 等） |
+| SP 余白 | `$sp-sidePadding` |
+| インナー幅 | `$pc-inner`, `$pc-narrow-inner` |
+| カラー | `$color-text`, `$color-main`, `$color-bg`, `$accent-color` |
+| フォント | `$ff`, `$ff-jp`, `$ff-en`, `$ff-both`（`$ff-en` は英語見出し等専用。Google / Adobe どちらでも可） |
+| ヘッダー高 | `$sp-header-height`, `$pc-header-height`（実装後に計測値で更新） |
+
+**【固定】** と書いてある項目（`$breakpoint: 768` 等）は変更しない。
+
+### 3. `functions.php` のフォント（案件開始時のみ）
+
+`_variables.scss` で使うフォントを **同じ family 名** で読み込む。
+
+```php
+// 例: Noto Sans JP（Google Fonts）
+wp_enqueue_style('google-fonts', '//fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap', ...);
+
+// 例: $ff-en に Roboto を使う場合 → 上記 URL に family=Roboto も追加
+// 例: $ff-en に Adobe Fonts のフォント → Kit スクリプト等を別途 wp_enqueue
+```
+
+- `$ff-en` は **英語テキスト専用**の変数。Google Fonts でも Adobe Fonts でもよい
+- フォント確定後は **以降 `_variables.scss` だけ触れば OK**（`functions.php` は再変更不要）
+
+### 4. その他（必要に応じて）
+
+- [ ] `style.css` のテーマ名・説明を案件用に更新
+- [ ] 案件固有カラー変数（`$color-accent-001` 等）を `_variables.scss` に追加
+- [ ] ページ個別上書きが必要なら `style.scss` に `@use 'customize'` を追加
+- [ ] テーマフォルダのみ Cursor で開く場合 → `GULP/.cursor/rules/` を `theme/.cursor/rules/` にコピー
+
+---
+
+## スニペット・運用手順
+
+`GUIDE.md` にスニペット prefix 一覧・CF7 の組み立て方・AI 依頼例をまとめてある。
+
+---
+
+## AI 依頼方針
+
+`.cursor/rules/ai-workflow.mdc` を参照。
+
+---
+
+## ディレクトリ構成
+
+```
+theme/                                # WordPress テーマルート
+├── style.css                         # テーマ情報のみ
+├── functions.php                     # アセット読込・WP 設定
+├── header.php / footer.php           # 最小限の HTML シェル
+├── front-page.php, page-*.php ...    # ページテンプレート
+├── template-parts/                   # 再利用パーツ（header, footer, cta 等）
+└── dev/                              # フロントエンド開発環境
+    ├── gulpfile.js / webpack.config.js / package.json
+    ├── src/assets/
+    │   ├── scss/                     # FLOCSS 5レイヤー
+    │   ├── js/                       # ES Modules → bundle.js
+    │   └── img/                      # ソース画像（sp/ サブフォルダあり）
+    └── public/assets/                # ビルド成果物（WP から参照）
+        ├── css/style.css
+        ├── js/bundle.js
+        └── img/
+```
+
+**SCSS レイヤー順（テンプレート `style.scss`）**
+
+```scss
+@use 'foundation';   // reset, base
+@use 'layout';       // l-header, l-main, l-inner
+@use 'component';    // c-button, c-hamburger
+@use 'project';      // p-header, p-top-fv 等
+@use 'utility';      // u-only, u-pointerNone
+// @use 'customize';  // 案件ごとに追加（tokyo-brand 等）
+```
+
+- `component/` / `project/` は `_index.scss`（空でも可）が必要。HTML/PHP の class から `createScss` が SCSS を自動生成する
+
+**ビルドフロー**
+- `npm run dev` → Gulp watch + BrowserSync
+- SCSS → PostCSS（autoprefixer, css-declaration-sorter: smacss）→ CSS
+- JS → Webpack（Babel preset-env, target: es5）→ `bundle.js`
+- HTML/PHP の class 名から SCSS ファイルを自動生成する `createScss` タスクあり
+
+---
+
+## コーディングルール
+
+### HTML（PHP テンプレート）
+
+**クラス命名規則（FLOCSS + BEM）**
+
+| プリフィックス | 用途 | 例 |
+|---|---|---|
+| `l-` | レイアウト（ページ構造） | `l-header`, `l-main`, `l-inner` |
+| `p-` | プロジェクト（ページ固有ブロック） | `p-header__logo`, `p-top-fv` |
+| `c-` | コンポーネント（再利用 UI） | `c-button`, `c-hamburger`, `c-heading` |
+| `u-` | ユーティリティ（単一責任） | `u-only__sp`, `u-pointerNone__sp` |
+| `js_` | JavaScript フック（`js_` + camelCase） | `js_drawer`, `js_details`, `js_shopsTab`, `js_drawerOpen` |
+
+- 要素：ダブルアンダースコア（`block__element`）
+- 修飾子：シングルハイフン（`block -modifier`）— BEM の `--` は使わない
+  ```html
+  <a class="c-button-line -big">
+  <li class="p-drawer__button -line">
+  <div class="l-inner -narrow">
+  ```
+- 状態クラス：`is_` プリフィックス + アンダースコア区切り（**過去分詞**で統一）
+  - `is_opened` — 開かれた状態（ドロワー、モーダル、アコーディオン、サブメニュー共通）
+  - `is_shown` — 表示された状態（タブパネル、フローティング CTA 等）
+  - `is_fixed` — 固定された状態（body スクロールロック）
+  - `is_scrolled` — スクロールされた状態（ヘッダー連動）
+
+**レイアウト構造**
+- Layout（`l-`）+ Project（`p-`）の二重構造
+  ```html
+  <header id="header" class="l-header">
+    <div class="p-header">...</div>
+  </header>
+  <main class="l-main">...</main>
+  <footer class="l-footer">...</footer>
+  ```
+- インナーラッパー: `p-section__inner l-inner`
+
+**属性の書き方**
+- `data-*` 属性で JS 用データを渡す（例：`data-index`, `data-gallery-count`）
+- ARIA 属性を適切に付与（`aria-expanded`, `aria-controls`, `aria-label`, `role="tab"`, `role="dialog"`, `aria-modal="true"`）
+- 非表示メニューは `inert` 属性を使用（`aria-hidden` は使わない方針）
+- 外部リンク: `target="_blank" rel="nofollow noopener"` を必ず付与
+  ```html
+  <a href="https://example.com" target="_blank" rel="nofollow noopener">リンクテキスト</a>
+  ```
+- サイト内リンク（同一ドメイン）には `rel="nofollow noopener"` は不要
+
+**セマンティック HTML**
+- `<header>`, `<main>`, `<footer>`, `<nav>`, `<section>`, `<figure>`, `<picture>` を適切に使用
+- ボタン操作には `<button type="button">` を使用
+- ページ遷移には `<a href>` を使用
+- アコーディオンは `<details>` / `<summary>` を使用
+
+**画像**
+```html
+<picture>
+  <source media="(min-width: 768px)" srcset="..." width="..." height="...">
+  <img src="..." alt="..." width="..." height="..." loading="lazy">
+</picture>
+```
+- SP 画像は `dev/public/assets/img/sp/` 配下
+- 装飾画像: `alt=""`, `aria-hidden="true"`, `loading="lazy"`
+- `width`, `height` 属性を必ず指定
+
+**WordPress エスケープ**
+```php
+<?php echo esc_url(home_url('/')); ?>
+<?php echo esc_html(get_field('field_name')); ?>
+<?php echo nl2br(esc_html(get_field('textarea_field'))); ?>  // 改行ありテキスト
+<?php echo esc_attr($value); ?>
+<?php echo esc_url(get_theme_file_uri('dev/public/assets/img/...')); ?>
+```
+- 画像・アセットパスは `get_theme_file_uri()` を使用（`get_template_directory_uri()` ではない）
+- カスタムフィールド出力前に存在チェックを行う（ACF / SCF 共通）
+
+**コメント**
+- セクション開始:
+  ```html
+  <!-- header   ///////////////////////////////////////////////////// -->
+  <!-- fv   ///////////////////////////////////////////////////// -->
+  <!-- nav ///////////////////////////// -->
+  ```
+- ブロック終了:
+  ```html
+  <!-- /.p-header__logo -->
+  <!-- /.p-header -->
+  ```
+
+---
+
+### CSS / SCSS
+
+**設計手法：FLOCSS**
+- `foundation`：reset, base
+- `layout`（`l-`）：レイアウト層
+- `component`（`c-`）：コンポーネント層
+- `project`（`p-`）：プロジェクト層
+- `utility`（`u-`）：ユーティリティ層
+
+**ファイル先頭**
+```scss
+@use '../global' as *;
+```
+
+**SCSS ファイル命名**: クラス名と対応 `_p-fv.scss`, `_c-heading.scss`, `_l-inner.scss`
+
+**SCSS のネストルール**
+- BEM 要素（`__`）は**ネストせず**独立したセレクタで記述
+- 修飾子（`-`）・状態クラス・疑似要素はネスト可
+  ```scss
+  // NG
+  .c-block {
+    &__element {}
+    &--modifier {}
+  }
+
+  // OK
+  .c-block {}
+  .c-block__element {}
+  .c-block {
+    &.-big {}
+    &.is_opened {}
+    &::before {}
+  }
+  ```
+- ネストして良いのは以下の場合のみ
+  - 修飾子：`&.-big`, `&.-narrow`
+  - 状態クラス：`&.is_opened`, `&.is_shown`
+  - 疑似要素：`&::before`, `&::after`
+  - 疑似クラス：`&:hover`, `&:nth-child()` など
+  - メディアクエリ：`@include mq(pc)` など
+  - JS 用クラス：`&.js_drawer.is_opened`
+
+**セクションコメント**
+```scss
+// ----------------------------
+//  タブ
+// ----------------------------
+// ----------------------------
+//  モディファイア
+// ----------------------------
+// ----------------------------
+//  ホバー
+// ----------------------------
+// ******** responsive(pc)
+@include mq(pc) { ... }
+
+// △▽△▽△▽△▽ JS用クラス
+```
+
+**関数・単位**
+```scss
+@function rm($arg) {
+  @return calc($arg / 16 * 1rem);
+}
+@function px($arg) { @return calc($arg * 1px); }
+@function vw($arg) { @return calc($arg / $pc-camp * 100vw); }    // PC カンプ 1440px 基準
+@function vw-sp($arg) { @return calc($arg / $sp-camp * 100vw); } // SP カンプ（$sp-camp 基準）
+```
+- デザインカンプの数値は `rm()` を通して指定する
+  ```scss
+  width: rm(320);  // カンプの320pxをremに変換
+  ```
+
+**ブレークポイント（`_variables.scss`）**
+```scss
+$breakpoint: 768;       // SP/PC 境界
+$md-breakpoint: 550;
+$tb-breakpoint: 1024;
+$pc-camp: 1440;         // PC カンプサイズ
+$sp-camp: 375;          // SP カンプサイズ（案件ごとに _variables.scss で設定。テンプレート既定値）
+$sp-sidePadding: 15;    // SP サイド padding（テンプレート既定値）
+```
+
+**レスポンシブの書き方（`global/_mixin.scss` の `$responsiveBase`）**
+
+`$responsiveBase` は **リキッドレイアウトとは別物**。CSS を「SP から書くか / PC から書くか」を決めるスイッチ。
+
+| 値 | 意味 | 書き方 |
+|---|---|---|
+| `sp`（テンプレート既定） | SP ファースト | 基本スタイル = SP → `@include mq(pc)` で PC 上書き |
+| `pc` | PC ファースト | 基本スタイル = PC → `@include mq(sp)` で SP 上書き |
+
+`@include mq()` が生成するメディアクエリの向き、`l-inner` や `u-only` の初期スタイルもこの値に連動する。**通常は `sp` のまま変更しない。**
+
+```scss
+// global/_mixin.scss（通常触らない）
+$responsiveBase: sp;
+```
+
+| キー | メディアクエリ |
+|---|---|
+| `sp` | `max-width: 767px` |
+| `md` | `min-width: 550px` |
+| `pc` | `min-width: 768px` |
+| `tb` | `768px–1023px` |
+| `lg` | `min-width: 1300px`（inner + padding） |
+
+```scss
+.p-section {
+  padding-block: rm(59) rm(60);
+
+  // ******** responsive(pc)
+  @include mq(pc) {
+    padding-block: rm(100);
+  }
+}
+```
+
+**レスポンシブ方針**
+- SP ファースト：`@include mq(pc)` で PC 上書き
+- 流動フォント（`html` に設定）:
+  ```scss
+  html {
+    @media screen and (max-width: 1439px) and (min-width: 768px) {
+      font-size: calc(16 / 1440 * 100vw);
+    }
+    @media screen and (max-width: 767px) {
+      font-size: calc(16 / #{$sp-camp} * 100vw);
+    }
+  }
+  ```
+- 表示切替 Utility: `u-only__sp` / `u-only__pc`
+- 向き切替: `u-only__portrait` / `u-only__landscape`
+- PC では `tel:` リンクを無効化
+- JS/CSS 共通のブレークポイント: **768px**
+
+**アニメーション**
+- トランジション: `$easing: 0.3s ease-out`, `$transition: all 0.3s ease-out`
+- GSAP: アコーディオン、FV アニメ等
+- フェードイン: `.fadeUpTrigger` → `.fadeUp` クラス付与で CSS `@keyframes` 発火
+
+**ホバー対応**
+```scss
+@media (any-hover: hover) {
+  &:hover { ... }
+}
+&:focus { outline: none; }
+&:focus-visible { /* 視覚的フィードバック */ }
+```
+
+**z-index 変数（テンプレート既定値。案件ごとに `_variables.scss` で追加・調整）**
+```scss
+$z-header: 100;
+$z-drawer: 101;
+$z-drawerIcon: 102;
+// 必要に応じて追加: $z-floating, $z-modal 等
+```
+
+**主要 mixin**
+- `@mixin mq($breakpoint)` — メディアクエリ
+- `@mixin font($size, $weight, $height, $spacing)` — フォント一括指定
+- `@mixin chevron(...)` — SVG mask ベースの矢印アイコン
+- `$leading-trim` — line-height 上下余白打ち消し
+
+---
+
+### JavaScript
+
+**記法**
+- `const` / `let` を使用（`var` は使わない）
+- ES Modules（`import` / `export`）
+- セミコロンあり
+
+**構造**
+```javascript
+// -----------------------------------------------------------
+//  機能名
+// -----------------------------------------------------------
+export function js_featureName() {
+  // ...
+}
+```
+
+**ファイル分割**
+```
+dev/src/assets/js/
+├── main.js              # エントリー: import + 即実行
+├── js_drawer.js         # 機能別 1 ファイル
+├── js_accordion.js
+├── js_smooth.js
+└── utils/
+    ├── breakpoint.js    # BREAKPOINT = 768
+    └── utils.js         # rm() JS版
+```
+
+**main.js パターン**
+```javascript
+import { js_drawer } from './js_drawer';
+js_drawer(); // 実行
+```
+
+**命名規則**
+- ファイル名: `js_<機能名>.js`（スネークケース）
+- エクスポート: `export function js_<機能名>()`
+- HTML の class / id: **`js_` + camelCase**（例：`js_drawer`, `js_shopsTab`, `js_drawerOpen`, `js_shopsMapModal`）
+- ID も同様: `#js_drawerOpen`, `#drawer`, `#header`
+
+**DOM操作**
+- jQuery と Vanilla JS を用途に応じて使い分け
+  - jQuery: ドロワー、スムーススクロール、フェードイン
+  - Vanilla JS: タブ、アコーディオン、Swiper 初期化
+- `querySelector` / `querySelectorAll` を使用
+- クラス操作: `classList.add()` / `remove()` / `contains()`
+
+**状態管理**
+- CSS 状態は `is_opened` / `is_shown` 等のクラスで管理
+- JavaScript からはスタイルを直接書かない（クラス操作のみ）
+- 例外: ドロワーのスクロールロック（`body.is_fixed` + `top` 値）
+
+**JS の `rm()` ユーティリティ**
+```javascript
+export function rm(arg) {
+  const htmlFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return (arg / 16) * htmlFontSize;
+}
+```
+Swiper の `spaceBetween` 等で使用。
+
+**ライブラリ**
+| ライブラリ | 用途 | 読込 |
+|---|---|---|
+| jQuery | ドロワー、スムーススクロール、フェードイン | WP 同梱 |
+| GSAP 3.15 + ScrollTrigger | アコーディオンアニメ、FV アニメ | CDN |
+| Swiper 12 | スライダー | CDN |
+
+**リサイズ処理**
+- debounce 200ms が標準（`js_pointerNone`, `js_swiperResult` 等）
+- PC 幅（≥768px）にリサイズでドロワーを強制クローズ
+
+---
+
+## 保守性ルール
+
+### 画像の指定
+- `width: 100%` を指定し、`height` は `auto` にする
+- 縦横比は `aspect-ratio` で指定する
+- `img` には `object-fit: cover` を指定する
+
+### 高さの指定
+- 全ての要素に対して極力 `height` は指定しない
+- 要素の高さは**コンテンツの分量で決まる**ものとする
+- 高さが必要な場合は `padding` で対応する
+
+### 差し替え・追加削除への対応
+- 画像・テキストの差し替え、要素の追加・削除が起きても崩れない構造にする
+- 固定値で要素を配置せず、フレキシブルな設計を優先する
+
+---
+
+## プロパティの書き方
+
+論理プロパティ（Logical Properties）を使用する。`top / bottom / left / right` は使わない。
+
+| 使わない書き方 | 使う書き方 |
+|---|---|
+| `padding-top` | `padding-block-start` |
+| `padding-bottom` | `padding-block-end` |
+| `padding-left` | `padding-inline-start` |
+| `padding-right` | `padding-inline-end` |
+| `margin-top` | `margin-block-start` |
+| `margin-bottom` | `margin-block-end` |
+| `border-top` | `border-block-start` |
+| `border-left` | `border-inline-start` |
+
+```scss
+/* NG */
+.element {
+  padding-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* OK */
+.element {
+  padding-block-start: 2rem;
+  margin-block-end: 1rem;
+}
+```
+
+---
+
+## パフォーマンス方針
+
+- 画像は `loading="lazy"` を付与する
+- `<picture>` + `media` で SP/PC 画像を切替
+- アセットは Webpack で `bundle.js` にバンドル
+- 画像は TinyPNG + WebP 変換

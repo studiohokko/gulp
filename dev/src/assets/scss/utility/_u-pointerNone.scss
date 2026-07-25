@@ -1,0 +1,45 @@
+@use '../global' as *;
+
+.u-pointerNone {
+	pointer-events: none !important;
+}
+
+@if $responsiveBase == sp {
+	// 📱 SPファースト
+	.u-pointerNone__sp {
+		pointer-events: auto;
+
+		// PC以上でpointer-events: none
+		@include mq(pc) {
+			pointer-events: none !important;
+		}
+	}
+
+	.u-pointerNone__pc {
+		pointer-events: none;
+
+		// PC以上でpointer-events: none
+		@include mq(pc) {
+			pointer-events: none !important;
+		}
+	}
+} @else {
+	// 💻 PCファースト
+	.u-pointerNone__sp {
+		pointer-events: auto;
+
+		// SP以下でpointer-events: none
+		@include mq(sp) {
+			pointer-events: none !important;
+		}
+	}
+
+	.u-pointerNone__pc {
+		pointer-events: auto;
+
+		// PC以上でpointer-events: none
+		@include mq(pc) {
+			pointer-events: none !important;
+		}
+	}
+}

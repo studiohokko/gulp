@@ -1,0 +1,109 @@
+@use '../global' as *;
+
+@if $responsiveBase == sp {
+	// 📱 SPファースト
+	.l-inner {
+		position: relative;
+		width: 100%;
+		max-width: rm($sp-inner-sum);
+		height: inherit;
+		padding: 0 rm($sp-sidePadding);
+		margin-inline: auto;
+
+		// PC以上
+		@include mq(pc) {
+			max-width: rm($pc-inner-sum);
+			padding: 0 rm($pc-sidePadding);
+		}
+
+		&.-narrow {
+			max-width: rm($sp-inner-sum);
+			padding: 0 rm($sp-sidePadding);
+
+			// PC以上
+			@include mq(pc) {
+				max-width: rm($pc-narrow-inner-sum);
+				padding: 0 rm($pc-sidePadding);
+			}
+		}
+	}
+} @else {
+	// 💻 PCファースト
+	.l-inner {
+		position: relative;
+		width: 100%;
+		max-width: rm($pc-inner-sum);
+		height: inherit;
+		padding: 0 rm($pc-sidePadding);
+		margin-inline: auto;
+
+		// SP
+		@include mq(sp) {
+			max-width: rm($sp-inner-sum);
+			padding: 0 rm($sp-sidePadding);
+		}
+
+		&.-narrow {
+			max-width: rm($pc-narrow-inner-sum);
+
+			// SP
+			@include mq(sp) {
+				max-width: rm($sp-inner-sum);
+				padding: 0 rm($sp-sidePadding);
+			}
+		}
+	}
+}
+
+// .l-inner {
+// 	position: relative;
+// 	width: 100%;
+// 	max-width: px($pc-inner-sum);
+// 	height: inherit;
+// 	padding: 0 rm($pc-sidePadding);
+// 	margin-inline: auto;
+
+// 	// ******** responsive(sp)
+// 	@include mq(sp) {
+// 		width: 100%;
+// 		max-width: px($sp-inner-sum);
+// 		padding: 0 rm($sp-sidePadding);
+// 	}
+// }
+
+// .l-inner__narrow {
+// 	max-width: rm($pc-narrow-inner);
+
+// 	// ******** responsive(sp)
+// 	@include mq(sp) {
+// 		padding: 0 rm($sp-sidePadding);
+// 		max-width: px($sp-inner);
+// 	}
+// }
+
+// .l-inner {
+// 	position: relative;
+// 	width: 100%;
+// 	max-width: rm($pc-inner-sum);
+// 	height: inherit;
+// 	padding: 0 rm($pc-sidePadding);
+// 	margin-inline: auto;
+
+// 	// ******** responsive(sp)
+// 	@include mq(sp) {
+// 		width: 100%;
+// 		max-width: rm($sp-inner-sum);
+// 		padding: 0 rm($sp-sidePadding);
+// 	}
+
+// 	&.-narrow {
+// 		max-width: rm($pc-narrow-inner-sum);
+
+// 		// ******** responsive(sp)
+// 		@include mq(sp) {
+// 			padding: 0 rm($sp-sidePadding);
+// 			// max-width: px($sp-inner);
+// 			max-width: rm($sp-inner-sum);
+// 		}
+// 	}
+// }

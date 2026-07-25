@@ -1,0 +1,39 @@
+---
+description: AI への依頼方針（手書きコーディング優先）
+alwaysApply: true
+---
+
+# AI 依頼方針
+
+## 基本方針
+
+- **PHP テンプレートの HTML 構造**と **SCSS** はユーザーが手書きする
+- AI は **依頼された部分だけ** 生成・修正する
+- 依頼のないファイルを勝手に書き換えない
+
+## AI に任せる領域（積極的に依頼 OK）
+
+- ACF / カスタムフィールドの PHP 読み込み
+- JavaScript（ドロワー、Swiper、アコーディオン、CF7 ファイル UI 等）
+- functions.php の定型的な追加（CPT 登録、フィルター等）
+- コードレビュー（「レビューして」→ `code-review.mdc`）
+
+## 依頼の出し方（推奨）
+
+```
+この HTML 構造に ACF リピーター xxx を当てはめて PHP だけ書いて。SCSS は触らない。
+
+js_drawer の JS だけ作って。HTML は既にある。
+
+coding-guide に従って js_swiperTop.js だけ作って。
+```
+
+## 避ける依頼
+
+- 「トップページ全部作って」
+- 「この Figma を全部実装して」（Figma MCP 不使用）
+
+## 手書き時のツール
+
+- Cursor スニペット（`cf7-*`, `acf-*`, `section`, `mq` 等）
+- 運用手順: `~/Desktop/GULP/GUIDE.md`

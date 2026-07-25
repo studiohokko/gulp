@@ -1,0 +1,92 @@
+@use '../global' as *;
+
+html {
+	// ずっとリキッドレイアウトにするときはこれ
+	// @media screen and (min-width: #{px($pc-camp)}) {
+	// 	font-size: calc(16 / #{$pc-camp} * 100vw);
+	// }
+
+	// これはあんまりつかわない
+	// @media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
+	// 	font-size: calc(16 / #{$pc-inner-sum} * 100vw);
+	// }
+	// @media screen and (max-width: #{px($breakpoint) - 1px}) {
+	// 	font-size: calc(16 / #{$sp-camp} * 100vw);
+	// }
+
+	@media screen and (max-width: #{px($pc-camp) - 1px}) and (min-width: #{px($breakpoint)}) {
+		font-size: calc(16 / #{$pc-camp} * 100vw);
+	}
+	@media screen and (max-width: #{px($breakpoint) - 1px}) {
+		font-size: calc(16 / #{$sp-camp} * 100vw);
+	}
+
+	// ----------------------------
+	//  SPも途中で固定レイアウト
+	// ----------------------------
+	// // タブレット用（768px〜1119px）→ リキッド
+	// @media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
+	// 	html {
+	// 		font-size: calc(16 / #{$pc-inner-sum} * 100vw);
+	// 	}
+	// }
+	// // 小さいスマホ用（〜549px）→ リキッド
+	// @media screen and (max-width: #{px($md-breakpoint) - 1px}) {
+	// 	html {
+	// 		font-size: calc(16 / #{$sp-camp} * 100vw);
+	// 	}
+	// }
+}
+
+body {
+	overflow-x: clip;
+	// background-color
+	// color
+	// line-height
+	// font-size
+	// font-family
+
+	// ドロワーメニュー用
+	&.is_fixed {
+		position: fixed;
+		left: 0;
+		width: 100%;
+	}
+}
+
+body *,
+body *::before,
+body *::after {
+	// letter-spacing
+	-webkit-font-smoothing: antialiased;
+}
+
+video,
+img,
+picture,
+svg {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	object-fit: cover;
+}
+
+a,
+span {
+	display: inline-block;
+}
+
+button {
+	border: none;
+}
+
+// ******** responsive(pc)
+@include mq(pc) {
+	//pcではtelかけられないように
+	a[href*='tel:'] {
+		pointer-events: none;
+		cursor: default;
+		text-decoration: none;
+	}
+}

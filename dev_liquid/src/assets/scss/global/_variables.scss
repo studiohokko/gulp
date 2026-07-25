@@ -1,0 +1,66 @@
+// ===========================================================
+//  _variables.scss — 案件開始時に「案件ごと」セクションを更新
+//  フォント追加時は functions.php の Google Fonts URL も同時に更新
+// ===========================================================
+
+// -----------------------------------------------------------
+//  フォントファミリー 【案件ごと】
+// -----------------------------------------------------------
+$ff: 'Noto Sans JP', sans-serif; // body に指定するフォント
+$ff-jp: 'Noto Sans JP', sans-serif; // 日本語 only
+$ff-en: 'helvetica-lt-pro', sans-serif; // 英語 only（見出しの英字等。Google / Adobe どちらでも可）
+$ff-both: 'helvetica-lt-pro', 'Noto Sans JP', sans-serif; // 日英混在
+// 必要に応じて追加（使うフォントに合わせて functions.php 等で読み込み）
+// $ff-serif: 'Zen Old Mincho', serif;
+
+// -----------------------------------------------------------
+//  レイアウト（単位不要）
+// -----------------------------------------------------------
+
+// ======== PC インナー 【案件ごと】
+$pc-inner: 1200; // pc 版 inner 幅
+$pc-sidePadding: 50; // pc 版サイド padding
+$pc-inner-sum: calc($pc-inner + $pc-sidePadding * 2); // 【固定】自動計算
+$pc-narrow-inner: 1100; // 狭い inner 幅
+$pc-narrow-inner-sum: calc($pc-narrow-inner + $pc-sidePadding * 2); // 【固定】自動計算
+
+// ======== SP インナー 【案件ごと】
+$sp-sidePadding: 15; // sp 版サイド padding
+$sp-inner: 600;
+$sp-inner-sum: calc($sp-inner + $sp-sidePadding * 2); // 【固定】自動計算
+$sp-narrow-inner: 500;
+$sp-narrow-inner-sum: calc($sp-narrow-inner + $sp-sidePadding * 2); // 【固定】自動計算
+
+// ======== ブレイクポイント 【固定】（coding-guide / JS と連動。変更しない）
+$breakpoint: 768;
+$md-breakpoint: 550;
+$tb-breakpoint: 1024;
+
+// ======== カンプ 【案件ごと】（Figma の artboard 幅に合わせる）
+$pc-camp: 1440;
+$sp-camp: 375; // 375 / 390 等、案件ごと
+
+// ======== z-index 【固定】（必要に応じて $z-modal 等を【案件ごと】で追加）
+$z-header: 100;
+$z-drawer: 101;
+$z-drawerIcon: 102;
+
+// ======== header 【案件ごと】（ヘッダー実装後に計測値で更新）
+$sp-header-height: 60; // 仮値
+$pc-header-height: 80; // 仮値
+
+// -----------------------------------------------------------
+//  color 【案件ごと】（デザイン確定後に差し替え。仮色）
+// -----------------------------------------------------------
+$color-text: #333333;
+$color-main: #333333;
+$color-bg: #ffffff;
+$accent-color: #0066cc; // 必要に応じて追加・改名
+$white: #ffffff; // 【固定】
+$black: #000000; // 【固定】
+
+// -----------------------------------------------------------
+//  トランジション 【固定】
+// -----------------------------------------------------------
+$easing: 0.3s ease-out;
+$transition: all 0.3s ease-out;
