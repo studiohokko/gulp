@@ -1,14 +1,14 @@
 # GULP 使い方ガイド
 
-このファイル1つに、GULP フォルダの全体像・案件開始・スニペット・AI の使い方をまとめています。
+**案件に着手しているとき**に読むファイル。スニペット・CF7・ACF・AI の使い方など。
+
+案件が始まったとき（テンプレコピー・Local 設定・`_variables.scss` 初期化）は **[案件開始フロー.md](案件開始フロー.md)** を参照。
 
 ## 目次
 
 - [このフォルダは何？](#このフォルダは何)
 - [フォルダマップ](#フォルダマップ)
 - [`dev_liquid` と `dev` の違い](#dev_liquid-と-dev-の違い)
-- [案件開始：WordPress](#案件開始wordpress)
-- [案件開始：LP / 静的 HTML](#案件開始lp--静的-html)
 - [日常の作業](#日常の作業)
 - [Cursor スニペット](#cursor-スニペット)
   - [汎用 HTML](#汎用-html)
@@ -50,7 +50,8 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 | **`wordpress初期設定/`** | WP テーマ用 PHP 雛形 | WP 案件開始時 |
 | **`.cursor/rules/`** | AI 用コーディング規約 | Cursor で GULP / テーマを開いたとき |
 | **`prompts/`** | Playwright MCP 等の AI 依頼テンプレート | WP 管理画面を AI に操作させるとき |
-| **`GUIDE.md`** | このファイル | 忘れたとき |
+| **`案件開始フロー.md`** | 案件開始時の手順 | 新規案件のセットアップ |
+| **`GUIDE.md`** | このファイル | 着手後のコーディング |
 
 ---
 
@@ -71,33 +72,6 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 |---|---|
 | `http://example.local/` 等 | WordPress（Local をプロキシ） |
 | **空** | LP / 静的 HTML（`public/` を直接配信） |
-
----
-
-## 案件開始：WordPress
-
-1. `dev_liquid/` → テーマ内 **`dev/`** としてコピー
-2. `wordpress初期設定/` → テーマルートにコピー
-3. `.cursor/rules/` → テーマ内 `.cursor/rules/` にコピー（テーマだけ Cursor で開く場合）
-4. `dev/.env.example` → `dev/.env` にコピーし、`BS_PROXY` を Local の URL に設定
-5. `cd dev && npm install && npm run dev`
-
-### WP 案件で覚えること
-
-- アセットパス: `get_theme_file_uri('dev/public/assets/...')`
-- GULP 上の名前 `dev_liquid` → テーマ内では **`dev/`** にリネーム
-- `_variables.scss` の **【案件ごと】** を Figma 値で更新
-- フォント確定時のみ `functions.php` の Google Fonts も更新
-
----
-
-## 案件開始：LP / 静的 HTML
-
-1. **`dev_liquid/`** または **`dev/`** をプロジェクトにコピー（リキッドか px 固定かで選択）
-2. `.env` の **`BS_PROXY` を空** にする
-3. `src/` に `index.html` 等を置く
-4. `npm install` → `npm run dev`
-5. 画像パス: `./assets/img/...`（`img-html` スニペット等。PHP パスは使わない）
 
 ---
 
@@ -292,6 +266,7 @@ Local の wp-admin（固定ページ + AIOSEO 等）を AI に操作させると
 ## クイックリファレンス
 
 ```
+案件開始            → 案件開始フロー.md
 リキッド（基本）     → dev_liquid/
 px 固定             → dev/
 WP 案件             → dev_liquid + wordpress初期設定 + BS_PROXY あり
@@ -299,5 +274,5 @@ LP / 静的           → dev_liquid or dev + BS_PROXY 空
 CF7                 → スニペット cf7-* → CF7 管理画面へコピー
 ACF                 → スニペット acf-* または AI に PHP だけ依頼
 WP 管理画面（AI）   → prompts/wp-admin-playwright.md（詳細は同ファイル内）
-忘れた              → この GUIDE.md
+着手後・忘れた      → この GUIDE.md
 ```

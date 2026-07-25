@@ -18,7 +18,7 @@ FLOCSS + BEM 設計、Gulp + Webpack ビルド、SP ファーストのレスポ�
 
 ## GULP テンプレート（`~/Desktop/GULP/`）
 
-> 運用手順・スニペット一覧は **`GUIDE.md`** を参照。
+> 運用手順・スニペット一覧は **`GUIDE.md`**（着手後）。案件開始時は **`案件開始フロー.md`** を参照。
 
 | フォルダ | 用途 |
 |---|---|
@@ -45,61 +45,11 @@ FLOCSS + BEM 設計、Gulp + Webpack ビルド、SP ファーストのレスポ�
 
 ---
 
-## 案件開始チェックリスト
+## 案件開始
 
-新規 WP 案件を始めるとき、以下を順に確認する。
+新規案件のセットアップ手順は **`案件開始フロー.md`** を参照（人間向けの正本）。
 
-### 1. テンプレートのコピー
-
-**WordPress**
-- [ ] `dev_liquid/` → テーマ内 `dev/`
-- [ ] `wordpress初期設定/` → テーマルート
-- [ ] `.cursor/rules/` → テーマ内（テーマのみ Cursor で開く場合）
-- [ ] `BS_PROXY` = Local URL
-
-**LP / 静的 HTML**
-- [ ] `dev_liquid/`（リキッド）または `dev/`（px 固定）をコピー
-- [ ] `BS_PROXY` = 空
-
-**共通**
-- [ ] `npm install` → `npm run dev`
-
-### 2. `_variables.scss`（`dev/src/assets/scss/global/_variables.scss`）
-
-ファイル内の **【案件ごと】** コメント箇所を Figma に合わせて更新する。
-
-| 項目 | 例 |
-|---|---|
-| カンプ幅 | `$pc-camp`, `$sp-camp`（375 / 390 等） |
-| SP 余白 | `$sp-sidePadding` |
-| インナー幅 | `$pc-inner`, `$pc-narrow-inner` |
-| カラー | `$color-text`, `$color-main`, `$color-bg`, `$accent-color` |
-| フォント | `$ff`, `$ff-jp`, `$ff-en`, `$ff-both`（`$ff-en` は英語見出し等専用。Google / Adobe どちらでも可） |
-| ヘッダー高 | `$sp-header-height`, `$pc-header-height`（実装後に計測値で更新） |
-
-**【固定】** と書いてある項目（`$breakpoint: 768` 等）は変更しない。
-
-### 3. `functions.php` のフォント（案件開始時のみ）
-
-`_variables.scss` で使うフォントを **同じ family 名** で読み込む。
-
-```php
-// 例: Noto Sans JP（Google Fonts）
-wp_enqueue_style('google-fonts', '//fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap', ...);
-
-// 例: $ff-en に Roboto を使う場合 → 上記 URL に family=Roboto も追加
-// 例: $ff-en に Adobe Fonts のフォント → Kit スクリプト等を別途 wp_enqueue
-```
-
-- `$ff-en` は **英語テキスト専用**の変数。Google Fonts でも Adobe Fonts でもよい
-- フォント確定後は **以降 `_variables.scss` だけ触れば OK**（`functions.php` は再変更不要）
-
-### 4. その他（必要に応じて）
-
-- [ ] `style.css` のテーマ名・説明を案件用に更新
-- [ ] 案件固有カラー変数（`$color-accent-001` 等）を `_variables.scss` に追加
-- [ ] ページ個別上書きが必要なら `style.scss` に `@use 'customize'` を追加
-- [ ] テーマフォルダのみ Cursor で開く場合 → `GULP/.cursor/rules/` を `theme/.cursor/rules/` にコピー
+AI への依頼例: 「案件開始フロー.md に従って、`_variables.scss` の【案件ごと】だけ Figma 値で更新して」
 
 ---
 
