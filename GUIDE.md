@@ -20,6 +20,7 @@
   - [CF7 の作り方（スニペット）](#cf7-の作り方スニペット)
   - [ACF](#acfhtmljson)
 - [AI の使い方](#ai-の使い方)
+- [Playwright MCP（WordPress 管理画面）](#playwright-mcpwordpress-管理画面)
 - [`.cursor/rules/` の中身](#cursorrules-の中身)
 - [クイックリファレンス](#クイックリファレンス)
 
@@ -48,6 +49,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 | **`dev/`** | px 固定レイアウト用 Gulp 環境 | リキッドを使わない案件のみ |
 | **`wordpress初期設定/`** | WP テーマ用 PHP 雛形 | WP 案件開始時 |
 | **`.cursor/rules/`** | AI 用コーディング規約 | Cursor で GULP / テーマを開いたとき |
+| **`prompts/`** | Playwright MCP 等の AI 依頼テンプレート | WP 管理画面を AI に操作させるとき |
 | **`GUIDE.md`** | このファイル | 忘れたとき |
 
 ---
@@ -118,6 +120,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 - **`html.json`** → メイン（`.html` / `.php` 両方で使用。`scope: html,php` 設定済み）
 - **`scss.json`** → `.scss` で効く
 - **`javascript.json`** → `.js` で効く
+- **`markdown.json`** → `.md` で効く（`wp-playwright` = Playwright MCP 依頼テンプレ）
 - **`php.json`** → 未使用（`html.json` に統一）
 
 ### 汎用 HTML
@@ -250,6 +253,7 @@ cf7-submit
 | PHP / SCSS の HTML 構造 | ACF 読み込み PHP |
 | クラス命名・レイアウト | JS（ドロワー、Swiper 等） |
 | | 定型的 functions.php |
+| | **WP 管理画面操作**（Playwright MCP・依頼時のみ） |
 
 **依頼例:**
 ```
@@ -258,6 +262,17 @@ js_drawer の JS だけ作って。
 ```
 
 **避ける:** 「トップ全部作って」
+
+---
+
+## Playwright MCP（WordPress 管理画面）
+
+Local の wp-admin（固定ページ + AIOSEO 等）を AI に操作させるとき → **`prompts/wp-admin-playwright.md`** を開き、`【】` を書き換えて Agent チャットにコピペ。
+
+- 前提: Playwright MCP を Cursor に追加済み・Local 起動中
+- ショートカット: `.md` 編集時にスニペット **`wp-playwright`**（`markdown.json`）でも同じ文面を展開できる
+
+詳細・短縮版・向き不向きはテンプレートファイル内に記載。
 
 ---
 
@@ -283,5 +298,6 @@ WP 案件             → dev_liquid + wordpress初期設定 + BS_PROXY あり
 LP / 静的           → dev_liquid or dev + BS_PROXY 空
 CF7                 → スニペット cf7-* → CF7 管理画面へコピー
 ACF                 → スニペット acf-* または AI に PHP だけ依頼
+WP 管理画面（AI）   → prompts/wp-admin-playwright.md（詳細は同ファイル内）
 忘れた              → この GUIDE.md
 ```

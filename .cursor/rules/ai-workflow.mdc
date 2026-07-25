@@ -16,6 +16,7 @@ alwaysApply: true
 - ACF / カスタムフィールドの PHP 読み込み
 - JavaScript（ドロワー、Swiper、アコーディオン、CF7 ファイル UI 等）
 - functions.php の定型的な追加（CPT 登録、フィルター等）
+- **WordPress 管理画面操作**（Playwright MCP・固定ページ + AIOSEO 等。依頼時のみ → `prompts/wp-admin-playwright.md`）
 - コードレビュー（「レビューして」→ `code-review.mdc`）
 
 ## 依頼の出し方（推奨）
