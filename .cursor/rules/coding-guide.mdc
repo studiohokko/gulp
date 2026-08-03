@@ -298,13 +298,13 @@ $sp-sidePadding: 15;    // SP サイド padding（テンプレート既定値）
 $responsiveBase: sp;
 ```
 
-| キー | メディアクエリ |
-|---|---|
-| `sp` | `max-width: 767px` |
-| `md` | `min-width: 550px` |
-| `pc` | `min-width: 768px` |
-| `tb` | `768px–1023px` |
-| `lg` | `min-width: 1300px`（inner + padding） |
+| キー | メディアクエリ | 用途（【1】リキッド設定時） |
+|---|---|---|
+| `sp` | `max-width: 767px` | SP レイアウト全般 |
+| `md` | `min-width: 550px` | 550px 以上（**PC 幅も含む**。SP 固定帯だけなら `mq-sp-fixed` を使う） |
+| `pc` | `min-width: 768px` | PC レイアウト（基本の切替） |
+| `tb` | `768px–1023px` | タブレット幅 |
+| `lg` | `min-width: 1300px`（`$pc-inner-sum`） | PC リキッド終了・16px 固定ゾーン（1300px〜） |
 
 ```scss
 .p-section {
@@ -314,22 +314,66 @@ $responsiveBase: sp;
   @include mq(pc) {
     padding-block: rm(100);
   }
+
+  // 1300px 以上だけ余白を広げる（固定ゾーン向けの調整例）
+  @include mq(lg) {
+    padding-block: rm(120);
+  }
+}
+
+// SP 固定ゾーン（550〜767px）だけ font-size 等を調整したい場合
+.p-block {
+  @include mq-sp-fixed {
+    font-size: rm(14);
+  }
+}
+```
+
+**`mq-sp-fixed` について**
+
+`foundation/_base.scss` 【1】では 550〜767px は `html` font-size が 16px 固定。この幅帯**だけ**を狙う mixin（内部で `mq(md)` + `mq(sp)` をネスト）。
+
+```scss
+@mixin mq-sp-fixed {
+  @include mq(md) {
+    @include mq(sp) {
+      @content;
+    }
+  }
 }
 ```
 
 **レスポンシブ方針**
 - SP ファースト：`@include mq(pc)` で PC 上書き
-- 流動フォント（`html` に設定）:
-  ```scss
-  html {
-    @media screen and (max-width: 1439px) and (min-width: 768px) {
-      font-size: calc(16 / 1440 * 100vw);
-    }
-    @media screen and (max-width: 767px) {
-      font-size: calc(16 / #{$sp-camp} * 100vw);
-    }
-  }
-  ```
+- 流動フォント（`foundation/_base.scss` の `html` に設定。**3 パターンから選択**）
+
+**【1】SP / PC ともに途中で固定（インナー幅基準）【基本・有効】**
+
+| 幅 | `html font-size` | `rm()` の挙動 |
+|---|---|---|
+| 〜549px | SP リキッド | 375 カンプ基準で伸縮 |
+| 550〜767px | **16px 固定** | カンプ px ≒ 実 px |
+| 768〜1299px | PC リキッド（`$pc-inner-sum`） | inner 幅基準で伸縮 |
+| 1300px〜 | **16px 固定** | カンプ px ≒ 実 px |
+
+```scss
+// 小さいスマホ（〜549px）→ リキッド
+@media screen and (max-width: #{px($md-breakpoint) - 1px}) {
+  font-size: calc(16 / #{$sp-camp} * 100vw);
+}
+// PC（768px〜1299px）→ リキッド（インナー幅基準）
+@media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
+  font-size: calc(16 / #{$pc-inner-sum} * 100vw);
+}
+```
+
+- `l-inner` の `max-width: rm($pc-inner-sum)` と **1300px で設計値に到達**するよう揃っている
+- 1300px 以上の調整 → `@include mq(lg)`
+- 550〜767px（SP 固定帯）の調整 → `@include mq-sp-fixed`
+
+**【2】SP / PC ともに途中で固定（PC カンプ基準）** — `_base.scss` コメント参照  
+**【3】ずっとリキッド** — `_base.scss` コメント参照
+
 - 表示切替 Utility: `u-only__sp` / `u-only__pc`
 - 向き切替: `u-only__portrait` / `u-only__landscape`
 - PC では `tel:` リンクを無効化

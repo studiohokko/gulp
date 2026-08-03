@@ -16,6 +16,9 @@
 			padding: 0 rm($pc-sidePadding);
 		}
 
+		// 1300px 以上（PC リキッド終了・固定ゾーン）。必要時のみ @include mq(lg) で上書き
+		// @include mq(lg) { ... }
+
 		&.-narrow {
 			max-width: rm($sp-narrow-inner-sum);
 			padding: 0 rm($sp-sidePadding);
@@ -36,6 +39,9 @@
 		height: inherit;
 		padding: 0 rm($pc-sidePadding);
 		margin-inline: auto;
+
+		// 1300px 以上（PC リキッド終了・固定ゾーン）。必要時のみ @include mq(lg) で上書き
+		// @include mq(lg) { ... }
 
 		// SP
 		@include mq(sp) {

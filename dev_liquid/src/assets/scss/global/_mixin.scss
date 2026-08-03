@@ -1,4 +1,6 @@
 @use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
 @use './variables' as *;
 
 // -----------------------------------------------------------
@@ -44,6 +46,85 @@ $mediaqueries: ();
 	@media #{map.get($mediaqueries, $breakpoint)} {
 		@content;
 	}
+}
+
+// SP 固定ゾーン（550〜767px）。html font-size が 16px 固定の幅帯。
+// mq(md) 単体は min-width: 550px（PC 幅も含む）なので、SP 固定帯だけを狙う場合はこちら。
+@mixin mq-sp-fixed {
+	@include mq(md) {
+		@include mq(sp) {
+			@content;
+		}
+	}
+}
+
+// lg（min-width: $pc-inner-sum）… PC リキッド終了・16px 固定ゾーン（1300px〜）の開始
+
+// -----------------------------------------------------------
+//  矢印アイコン（SVG mask）
+// -----------------------------------------------------------
+@function _r($n) {
+	@return math.div(math.round($n * 100), 100);
+}
+
+$_chevron-rotate: (
+	left: 0,
+	up-left: 45,
+	up: 90,
+	up-right: 135,
+	right: 180,
+	down-right: 225,
+	down: 270,
+	down-left: 315,
+);
+
+@function _chevron-rot($direction) {
+	@if meta.type-of($direction) == 'number' {
+		@if math.is-unitless($direction) {
+			@return $direction;
+		} @else if math.unit($direction) == 'deg' {
+			@return math.div($direction, 1deg);
+		} @else {
+			@error "chevron: $direction は deg か単位なしで指定してください";
+		}
+	}
+	@if map.has-key($_chevron-rotate, $direction) {
+		@return map.get($_chevron-rotate, $direction);
+	}
+	@error "chevron: $direction が不正です（指定値: #{$direction}）";
+}
+
+@mixin chevron(
+	$size: rm(24),
+	$thickness: 3,
+	$color: currentColor,
+	$direction: left,
+	$angle: 90
+) {
+	$rot: _chevron-rot($direction);
+	$L: 10;
+	$half: math.div($angle, 2);
+	$dx: _r($L * math.cos($half * 1deg));
+	$dy: _r($L * math.sin($half * 1deg));
+	$ax: _r(12 - math.div($dx, 2));
+	$tx: _r(12 + math.div($dx, 2));
+	$y1: _r(12 - $dy);
+	$y2: _r(12 + $dy);
+
+	$svg: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="#{$thickness}" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(#{$rot} 12 12)"><path d="M#{$tx},#{$y1} L#{$ax},12 L#{$tx},#{$y2}"/></g></svg>';
+
+	display: inline-block;
+	width: $size;
+	height: $size;
+	background-color: $color;
+	mask-image: url('#{$svg}');
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: contain;
+	-webkit-mask-image: url('#{$svg}');
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: contain;
 }
 
 // -----------------------------------------------------------

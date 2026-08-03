@@ -48,7 +48,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 |---|---|---|
 | **`dev_liquid/`** | リキッドレイアウト用 Gulp 環境 | 新規案件開始時にコピー |
 | **`dev/`** | px 固定レイアウト用 Gulp 環境 | リキッドを使わない案件のみ |
-| **`wordpress初期設定/`** | WP テーマ用 PHP 雛形 | WP 案件開始時 |
+| **`wordpress初期設定/`** | WP テーマ用 PHP 雛形（`404.php` / `_p-404.scss` 同梱） | WP 案件開始時 |
 | **`.cursor/rules/`** | AI 用コーディング規約 | Cursor で GULP / テーマを開いたとき |
 | **`prompts/`** | Figma / Playwright MCP 等の AI 依頼テンプレート | WP 管理画面・Figma 連携を AI に任せるとき |
 | **`案件開始フロー.md`** | 案件開始時の手順 | 新規案件のセットアップ |
@@ -61,7 +61,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 
 | | **`dev_liquid/`** | **`dev/`** |
 |---|---|---|
-| レイアウト | **リキッド**（`html` font-size を vw 可変 → `rm()` が伸縮） | **px 固定**（vw 設定なし） |
+| レイアウト | **リキッド**（`html` font-size を vw 可変 → `rm()` が伸縮。`_base.scss` 【1】が基本） | **px 固定**（vw 設定なし） |
 | いつ使う | **基本はこちら**（WP も LP も） | デザインが px 固定指定の案件 |
 | WP | ○ | △（非推奨） |
 | LP / 静的 | ○ | ○ |
@@ -74,6 +74,17 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 |---|---|
 | `http://example.local/` 等 | WordPress（Local をプロキシ） |
 | **空** | LP / 静的 HTML（`public/` を直接配信） |
+
+### リキッドの font-size ゾーン（`dev_liquid` / `_base.scss` 【1】）
+
+| 幅 | 状態 |
+|---|---|
+| 〜549px | SP リキッド |
+| 550〜767px | 16px 固定 |
+| 768〜1299px | PC リキッド（`$pc-inner-sum` 基準） |
+| 1300px〜 | 16px 固定 |
+
+詳細・パターン切替・`mq(lg)` / `mq-sp-fixed` の使い方 → **`.cursor/rules/coding-guide.mdc`**
 
 ---
 

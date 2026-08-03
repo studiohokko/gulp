@@ -1,40 +1,55 @@
 @use '../global' as *;
 
 html {
-	// ずっとリキッドレイアウトにするときはこれ
-	// @media screen and (min-width: #{px($pc-camp)}) {
+	// ===========================================================
+	//  リキッドレイアウト（font-size）
+	//  使うパターンだけコメント解除。基本は【1】
+	// ===========================================================
+
+	// -----------------------------------------------------------
+	// 【1】SP / PC ともに途中で固定（インナー幅基準）【基本】
+	//  〜549px     SP リキッド
+	//  550〜767px  16px 固定
+	//  768〜1299px PC リキッド（$pc-inner-sum 基準）
+	//  1300px〜    16px 固定
+	// -----------------------------------------------------------
+	@media screen and (max-width: #{px($md-breakpoint) - 1px}) {
+		font-size: calc(16 / #{$sp-camp} * 100vw);
+	}
+	@media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
+		font-size: calc(16 / #{$pc-inner-sum} * 100vw);
+	}
+
+	// -----------------------------------------------------------
+	// 【2】SP / PC ともに途中で固定（PCカンプ基準）
+	//  〜549px     SP リキッド
+	//  550〜767px  16px 固定
+	//  768〜1439px PC リキッド（$pc-camp 基準）
+	//  1440px〜    16px 固定
+	// -----------------------------------------------------------
+	// @media screen and (max-width: #{px($md-breakpoint) - 1px}) {
+	// 	font-size: calc(16 / #{$sp-camp} * 100vw);
+	// }
+	// @media screen and (max-width: #{px($pc-camp) - 1px}) and (min-width: #{px($breakpoint)}) {
 	// 	font-size: calc(16 / #{$pc-camp} * 100vw);
 	// }
 
-	// これはあんまりつかわない
-	// @media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
-	// 	font-size: calc(16 / #{$pc-inner-sum} * 100vw);
-	// }
+	// -----------------------------------------------------------
+	// 【3】ずっとリキッド（SP / PC ともに固定なし）
+	//  〜767px     SP リキッド
+	//  768〜1439px PC リキッド（$pc-camp 基準）
+	//  1440px〜    16px 固定
+	// -----------------------------------------------------------
 	// @media screen and (max-width: #{px($breakpoint) - 1px}) {
 	// 	font-size: calc(16 / #{$sp-camp} * 100vw);
 	// }
-
-	@media screen and (max-width: #{px($pc-camp) - 1px}) and (min-width: #{px($breakpoint)}) {
-		font-size: calc(16 / #{$pc-camp} * 100vw);
-	}
-	@media screen and (max-width: #{px($breakpoint) - 1px}) {
-		font-size: calc(16 / #{$sp-camp} * 100vw);
-	}
-
-	// ----------------------------
-	//  SPも途中で固定レイアウト
-	// ----------------------------
-	// // タブレット用（768px〜1119px）→ リキッド
-	// @media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
-	// 	html {
-	// 		font-size: calc(16 / #{$pc-inner-sum} * 100vw);
-	// 	}
+	// @media screen and (max-width: #{px($pc-camp) - 1px}) and (min-width: #{px($breakpoint)}) {
+	// 	font-size: calc(16 / #{$pc-camp} * 100vw);
 	// }
-	// // 小さいスマホ用（〜549px）→ リキッド
-	// @media screen and (max-width: #{px($md-breakpoint) - 1px}) {
-	// 	html {
-	// 		font-size: calc(16 / #{$sp-camp} * 100vw);
-	// 	}
+
+	// 1440px 以上もリキッドにする場合（超大画面で拡大し続ける）
+	// @media screen and (min-width: #{px($pc-camp)}) {
+	// 	font-size: calc(16 / #{$pc-camp} * 100vw);
 	// }
 }
 

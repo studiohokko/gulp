@@ -173,8 +173,9 @@ alwaysApply: false
 新規テーマ作成時は `wordpress初期設定/` のファイルをテーマルートにコピーして使う。
 
 **同梱ファイル**
-- `functions.php`, `header.php`, `footer.php`, `front-page.php`, `style.css`
+- `functions.php`, `header.php`, `footer.php`, `front-page.php`, `404.php`, `style.css`
 - `template-parts/header.php`, `template-parts/footer.php` — 最小限のヘッダー・フッター雛形
+- `scss/project/_p-404.scss` — 404 ページ用（`dev/src/assets/scss/project/` にコピーし、`project/_index.scss` に `@use 'p-404';` を追加）
 
 **含まれる設定（`functions.php`）**
 - `my_asset_version()` — ビルド成果物の `filemtime` によるキャッシュバスティング
@@ -211,6 +212,11 @@ alwaysApply: false
 <?php get_template_part('template-parts/footer'); ?>
 <?php get_footer(); ?>
 ```
+
+**404 ページ（`404.php`）**
+- `template-parts/page-deco` / `breadcrumb` は含まない（案件ごとに必要なら追加）
+- ボタンは `p-404__buttonLink` を使用（`c-button` 非依存）
+- SCSS: `scss/project/_p-404.scss` → `dev/src/assets/scss/project/` へコピー（`dev_liquid` テンプレートには同梱済み）
 
 ---
 
