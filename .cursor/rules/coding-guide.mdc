@@ -13,6 +13,8 @@ FLOCSS + BEM 設計、Gulp + Webpack ビルド、SP ファーストのレスポ�
 参照プロジェクト: `tokyo-brand`, `eight-corporate`
 
 > 特定の UI パターン（ドロワー・モーダル・アコーディオン・タブ・グリッドレスポンシブ・WP 初期設定詳細・スニペット準拠マークアップ例）は **`coding-patterns.mdc`** に分離。該当する実装をする時は自動的に参照される。
+>
+> 画像の alt 属性の自動入力は **`alt-attributes.mdc`**（依頼時に自動参照）。判定ルールの正本は **`prompts/alt-attributes.md`**。
 
 ---
 
@@ -171,6 +173,7 @@ theme/                                # WordPress テーマルート
 - SP 画像は `dev/public/assets/img/sp/` 配下
 - 装飾画像: `alt=""`, `aria-hidden="true"`, `loading="lazy"`
 - `width`, `height` 属性を必ず指定
+- alt の判定・入力は依頼時 **`prompts/alt-attributes.md`**（「alt入れて」）。パスから画像を見て書き込む
 
 **WordPress エスケープ**
 ```php
