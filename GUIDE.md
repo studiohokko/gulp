@@ -51,7 +51,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 | **`dev/`** | px 固定レイアウト用 Gulp 環境 | リキッドを使わない案件のみ |
 | **`wordpress初期設定/`** | WP テーマ用 PHP 雛形（`404.php` / `_p-404.scss` 同梱） | WP 案件開始時 |
 | **`.cursor/rules/`** | AI 用コーディング規約 | Cursor で GULP / テーマを開いたとき |
-| **`prompts/`** | Figma / Playwright / alt 属性 等の AI 依頼テンプレート | WP 管理画面・Figma 連携・alt 提案を AI に任せるとき |
+| **`prompts/`** | Figma / Playwright / alt 属性 / コードレビュー 等の AI 依頼テンプレート | WP 管理画面・Figma 連携・alt・レビューを AI に任せるとき |
 | **`案件開始フロー.md`** | 案件開始時の手順 | 新規案件のセットアップ |
 | **`公開・移行フロー.md`** | 本番公開・移行時の手順 | AIOM エクスポート前 |
 | **`GUIDE.md`** | このファイル | 着手後のコーディング |
@@ -243,6 +243,7 @@ cf7-submit
 | | 定型的 functions.php |
 | | **WP 管理画面操作**（Playwright MCP・依頼時のみ） |
 | | **画像の alt 入力**（パスから画像を見て書き込む・依頼時のみ） |
+| | **コードレビュー**（「レビューして」・結果は `QUALITY_CHECK.md`） |
 
 **依頼例:**
 ```
@@ -250,6 +251,7 @@ cf7-submit
 js_drawer の JS だけ作って。
 alt入れて。front-page.php を対象に。
 このフォルダ全体の alt をルールに従って入力して。
+レビューして。
 ```
 
 **避ける:** 「トップ全部作って」
@@ -284,6 +286,17 @@ Figma から文言・ページ名・スラッグを取得し、コード入力�
 
 ---
 
+## コードレビュー（AI）
+
+公開・納品前にコード上の実害を洗いたいとき → **`prompts/code-review.md`**。判定ルールの正本。
+
+1. 案件のサイト（テーマ / LP）を開く
+2. 「**レビューして**」と言う
+3. 結果はワークスペース直下の **`QUALITY_CHECK.md`**
+4. コードは直さない（指摘と直し方だけ書く）
+
+---
+
 ## 画像の alt 属性（AI）
 
 対象の HTML/PHP を指定して alt を入力させるとき → **`prompts/alt-attributes.md`**。判定ルールの正本。
@@ -307,7 +320,7 @@ Figma から文言・ページ名・スラッグを取得し、コード入力�
 | `coding-patterns.mdc` | ドロワー/モーダル/アコーディオン/タブ/グリッド計算/WP初期設定詳細（該当する実装時のみ AI が自動参照） |
 | `alt-attributes.mdc` | 画像 alt の自動入力（「alt入れて」のとき自動参照。正本は `prompts/alt-attributes.md`） |
 | `ai-workflow.mdc` | 手書き優先・AI 依頼方針 |
-| `code-review.mdc` | 「レビューして」と言ったとき |
+| `code-review.mdc` | 「レビューして」のとき自動参照。正本は `prompts/code-review.md` |
 
 テーマフォルダだけ Cursor で開いている場合は、`.cursor/rules/` をテーマ側にコピーしてください。
 
@@ -327,5 +340,6 @@ ACF                 → スニペット acf-* または AI に PHP だけ依頼
 WP 管理画面（AI）   → prompts/wp-admin-playwright.md
 Figma + 表示確認   → prompts/figma-playwright.md
 画像 alt（AI）      → prompts/alt-attributes.md
+レビュー（AI）      → prompts/code-review.md
 着手後・忘れた      → この GUIDE.md
 ```

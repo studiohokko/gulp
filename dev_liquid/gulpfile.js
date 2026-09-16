@@ -277,17 +277,24 @@ const tinyPng = () => {
 		)
 		.pipe(dest('./public/assets/img'))
 		.on('finish', () => {
-			fs.writeFileSync(sigFilePath, JSON.stringify(sigs, null, 2));
+			const next = JSON.stringify(sigs, null, 2);
+			const prev = fs.existsSync(sigFilePath) ? fs.readFileSync(sigFilePath, 'utf8') : '';
+			if (next !== prev) {
+				fs.writeFileSync(sigFilePath, next);
+			}
 		});
 };
 
 const copyImages = () => {
 	// png/jpg は tinyPng が src から直接圧縮して public へ出力するため、ここでは除外する
 	// (圧縮済みの public 画像を未圧縮ソースで上書きして再圧縮させないため)
-	return src(['./src/assets/img/**/*', '!./src/assets/img/**/*.{png,jpg,jpeg}'], {
-		since: lastRun(copyImages),
-		encoding: false,
-	}).pipe(dest('./public/assets/img'));
+	return src(
+		['./src/assets/img/**/*', '!./src/assets/img/**/*.{png,jpg,jpeg}', '!./src/assets/img/**/.tinypng-sigs'],
+		{
+			since: lastRun(copyImages),
+			encoding: false,
+		},
+	).pipe(dest('./public/assets/img'));
 };
 
 // WebP が未生成、または PNG/JPG より古い場合のみ変換する
@@ -341,7 +348,11 @@ const cacheBusting = () => {
 const watchFiles = () => {
 	watch('./src/assets/scss/**/*.scss', series(compileSass, minifyCss, browserReload));
 	watch('./src/assets/js/**/*.js', { awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 } }, series(bundleJs, browserReload));
-	watch('./src/assets/img/**/*', series(copyImages, tinyPng, generateWebp, browserReload));
+	watch(
+		['./src/assets/img/**/*', '!./src/assets/img/**/.tinypng-sigs'],
+		{ awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 100 } },
+		series(copyImages, tinyPng, generateWebp, browserReload),
+	);
 	watch('./src/**/*.html', series(formatHTML, createScss, browserReload));
 	watch('../*.php', series(createScss, browserReload));
 };

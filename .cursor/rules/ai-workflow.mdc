@@ -18,7 +18,7 @@ alwaysApply: true
 - functions.php の定型的な追加（CPT 登録、フィルター等）
 - **WordPress 管理画面操作**（Playwright MCP・固定ページ + AIOSEO 等。依頼時のみ → `prompts/wp-admin-playwright.md`）
 - **画像の alt 属性**（HTML のパスから画像を見て入力。依頼時のみ → `prompts/alt-attributes.md`）
-- コードレビュー（「レビューして」→ `code-review.mdc`）
+- コードレビュー（「レビューして」→ `prompts/code-review.md`。コードは直さず `QUALITY_CHECK.md` に結果を書く）
 
 ## 依頼の出し方（推奨）
 
@@ -32,6 +32,8 @@ coding-guide に従って js_swiperTop.js だけ作って。
 alt入れて。front-page.php を対象に。
 
 このフォルダ全体の alt をルールに従って入力して。
+
+レビューして。
 ```
 
 ## 避ける依頼
