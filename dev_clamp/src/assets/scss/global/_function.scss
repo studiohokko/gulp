@@ -1,0 +1,50 @@
+@use 'sass:math';
+@use 'sass:map';
+@use 'sass:list';
+@use 'sass:meta';
+@use './variables' as *;
+
+// メディアクエリの幅指定など、px が必要なときだけ
+@function px($arg) {
+	@return calc($arg * 1px);
+}
+
+// 固定の rem。rm(24)
+@function rm($arg) {
+	@return calc($arg / $fluid-root * 1rem);
+}
+
+// -----------------------------------------------------------
+//  clamp(最小, 最大, 範囲)
+//  範囲は sp / pc / md / tb / lg。幅は $clamp-ranges。
+//  例: clamp(48, 64, sp) / clamp(80, 96, pc)
+//  出力は CSS の clamp(下限, 可変, 上限)
+// -----------------------------------------------------------
+@function _clamp-px($value) {
+	@if math.is-unitless($value) {
+		@return $value;
+	}
+	@return math.div($value, 1px);
+}
+
+@function clamp($min, $max, $range: sp) {
+	@if not map.has-key($clamp-ranges, $range) {
+		@error "clamp: 「#{$range}」は使えません。sp / pc / md / tb / lg のいずれかを指定してください";
+	}
+
+	$ends: map.get($clamp-ranges, $range);
+	$from: list.nth($ends, 1);
+	$to: list.nth($ends, 2);
+	$min-px: _clamp-px($min);
+	$max-px: _clamp-px($max);
+	$slope: math.div($max-px - $min-px, $to - $from);
+	$base: math.div($min-px - $slope * $from, $fluid-root);
+	$css-clamp: meta.get-function('clamp', $css: true);
+
+	@return meta.call(
+		$css-clamp,
+		math.div($min-px, $fluid-root) * 1rem,
+		calc(#{$base}rem + #{$slope * 100}vw),
+		math.div($max-px, $fluid-root) * 1rem
+	);
+}

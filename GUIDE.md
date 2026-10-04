@@ -8,7 +8,7 @@
 
 - [このフォルダは何？](#このフォルダは何)
 - [フォルダマップ](#フォルダマップ)
-- [`dev_liquid` と `dev` の違い](#dev_liquid-と-dev-の違い)
+- [`dev_liquid` / `dev_clamp` / `dev` の違い](#dev_liquid--dev_clamp--dev-の違い)
 - [日常の作業](#日常の作業)
 - [Cursor スニペット](#cursor-スニペット)
   - [汎用 HTML](#汎用-html)
@@ -47,8 +47,9 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 
 | パス | 何？ | いつ触る？ |
 |---|---|---|
-| **`dev_liquid/`** | リキッドレイアウト用 Gulp 環境 | 新規案件開始時にコピー |
-| **`dev/`** | px 固定レイアウト用 Gulp 環境 | リキッドを使わない案件のみ |
+| **`dev_liquid/`** | リキッドレイアウト用 Gulp 環境 | 新規案件開始時にコピー（基本） |
+| **`dev_clamp/`** | rem + clamp 用 Gulp 環境 | 固定は `rm()`、可変は `clamp(48, 64, sp)` |
+| **`dev/`** | px 固定レイアウト用 Gulp 環境 | リキッドも clamp も使わない案件 |
 | **`wordpress初期設定/`** | WP テーマ用 PHP 雛形（`404.php` / `_p-404.scss` 同梱） | WP 案件開始時 |
 | **`.cursor/rules/`** | AI 用コーディング規約 | Cursor で GULP / テーマを開いたとき |
 | **`prompts/`** | Figma / Playwright / alt 属性 / コードレビュー 等の AI 依頼テンプレート | WP 管理画面・Figma 連携・alt・レビューを AI に任せるとき |
@@ -58,14 +59,28 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 
 ---
 
-## `dev_liquid` と `dev` の違い
+## `dev_liquid` / `dev_clamp` / `dev` の違い
 
-| | **`dev_liquid/`** | **`dev/`** |
-|---|---|---|
-| レイアウト | **リキッド**（`html` font-size を vw 可変 → `rm()` が伸縮。`_base.scss` 【1】が基本） | **px 固定**（vw 設定なし） |
-| いつ使う | **基本はこちら**（WP も LP も） | デザインが px 固定指定の案件 |
-| WP | ○ | △（非推奨） |
-| LP / 静的 | ○ | ○ |
+| | **`dev_liquid/`** | **`dev_clamp/`** | **`dev/`** |
+|---|---|---|---|
+| レイアウト | **リキッド**（`html` font-size を vw → `rm()` が伸縮） | **rem + clamp**（固定は `rm(24)`、可変は `clamp(48, 64, sp)`） | **px 固定** |
+| いつ使う | **基本**（WP も LP も） | 文字サイズ変更・拡大を rem に乗せたい案件 | デザインが px 固定指定 |
+| WP | ○ | ○ | △（非推奨） |
+| LP / 静的 | ○ | ○ | ○ |
+
+### clamp の書き方（`dev_clamp`）
+
+`html` に vw の font-size は書かない。
+
+```scss
+padding-block: rm(24);          // 固定
+padding-block: clamp(48, 64, sp); // $sp-camp → SPインナー
+font-size: clamp(32, 44, pc);     // 768 → PCインナー
+```
+
+第3引数は `sp` / `pc` が基本。`md`（550→768）、`tb`（768→1024）、`lg`（PCインナー幅 1300→PCカンプ）も指定できる。スニペットは **`c`**。
+
+名前は `mq` と同じだが、幅は別。`mq(pc)` は 768px 以上でスタイルを当てる。`clamp(..., pc)` は 768px で最小、PCインナー（中身 1200 + 左右余白で 1300）で最大になり、そこで止まる。`mq(tb)` が 1023 までなのは「1024px 未満」の書き方のためで、`clamp` の終点は 1024。`@include mq(pc)` の中に書いても、第3引数は自動では変わらない。
 
 ### BrowserSync の切替（`dev_liquid` 共通）
 
@@ -131,6 +146,7 @@ GULP（金庫）  →  コピー  →  案件フォルダ（作業机）
 | prefix | 内容 |
 |---|---|
 | `mq` | `@include mq(pc)` ブロック |
+| `c` | `clamp(最小, 最大, sp/pc/md/tb/lg)` |
 | `cmt` / `cmtmin` / `cmtsmall` | コメント |
 | `hover` | any-hover セット |
 | `maiauto`, `main`, `pain` 等 | 論理プロパティ |
@@ -332,9 +348,10 @@ Figma から文言・ページ名・スラッグを取得し、コード入力�
 案件開始            → 案件開始フロー.md
 公開・移行          → 公開・移行フロー.md
 リキッド（基本）     → dev_liquid/
+clamp（rem）        → dev_clamp/
 px 固定             → dev/
-WP 案件             → dev_liquid + wordpress初期設定 + BS_PROXY あり
-LP / 静的           → dev_liquid or dev + BS_PROXY 空
+WP 案件             → dev_liquid または dev_clamp + wordpress初期設定 + BS_PROXY あり
+LP / 静的           → dev_liquid / dev_clamp / dev + BS_PROXY 空
 CF7                 → スニペット cf7-* → CF7 管理画面へコピー
 ACF                 → スニペット acf-* または AI に PHP だけ依頼
 WP 管理画面（AI）   → prompts/wp-admin-playwright.md

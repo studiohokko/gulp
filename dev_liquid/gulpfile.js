@@ -149,7 +149,7 @@ const formatHTML = () => {
 };
 
 const createScss = () => {
-	return src(['public/**/*.html', '../*.php']).pipe(
+	return src(['public/**/*.html', '../*.php', '../template-parts/**/*.php'], { allowEmpty: true }).pipe(
 		mapAsync(async (file) => {
 			const $ = cheerio.load(file.contents.toString());
 			const layoutIndexScssPath = 'src/assets/scss/layout/_index.scss';
@@ -354,7 +354,7 @@ const watchFiles = () => {
 		series(copyImages, tinyPng, generateWebp, browserReload),
 	);
 	watch('./src/**/*.html', series(formatHTML, createScss, browserReload));
-	watch('../*.php', series(createScss, browserReload));
+	watch(['../*.php', '../template-parts/**/*.php'], series(createScss, browserReload));
 };
 
 module.exports = {

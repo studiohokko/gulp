@@ -1,0 +1,19 @@
+@use '../global' as *;
+
+// 上限幅・左右余白は固定。幅で連続的に変えるときは clamp()。
+.l-inner {
+	position: relative;
+	width: 100%;
+	max-width: rm($pc-inner-sum);
+	height: inherit;
+	padding-inline: rm($sp-sidePadding);
+	margin-inline: auto;
+
+	@include mq(pc) {
+		padding-inline: rm($pc-sidePadding);
+	}
+
+	&.-narrow {
+		max-width: rm($pc-narrow-inner-sum);
+	}
+}

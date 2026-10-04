@@ -24,10 +24,11 @@ FLOCSS + BEM 設計、Gulp + Webpack ビルド、SP ファーストのレスポ�
 
 | フォルダ | 用途 |
 |---|---|
-| `dev_liquid/` | **リキッドレイアウト**（`rm()` + vw 可変）。WP / LP / 静的 HTML 共通の基本テンプレート |
-| `dev/` | **px 固定レイアウト**（`_base.scss` に vw なし）。リキッドを使わない案件用 |
+| `dev_liquid/` | **リキッドレイアウト**（`html` font-size を vw → `rm()` が伸縮）。基本テンプレート |
+| `dev_clamp/` | **rem + clamp**（`html` は動かさない。固定は `rm(24)`、可変は `clamp(48, 64, sp)`） |
+| `dev/` | **px 固定レイアウト**（`_base.scss` に vw なし） |
 
-**BrowserSync（`dev_liquid` / `dev` 共通）**
+**BrowserSync（`dev_liquid` / `dev_clamp` / `dev` 共通）**
 
 | `.env` の `BS_PROXY` | 用途 |
 |---|---|
@@ -35,15 +36,15 @@ FLOCSS + BEM 設計、Gulp + Webpack ビルド、SP ファーストのレスポ�
 | 空 | LP / 静的 HTML（`public/` 配信） |
 
 **新規 WP テーマ**
-1. `dev_liquid/` → テーマ内 **`dev/`** としてコピー
+1. `dev_liquid/` または `dev_clamp/` → テーマ内 **`dev/`** としてコピー
 2. `wordpress初期設定/` → テーマルートにコピー
 3. `.env` の `BS_PROXY` を Local URL に設定
 
 **新規 LP / 静的**
-1. `dev_liquid/` または `dev/` をコピー
+1. `dev_liquid/` / `dev_clamp/` / `dev/` をコピー
 2. `.env` の `BS_PROXY` を空にする
 
-> テーマ内のアセットパスは常に **`dev/public/assets/`**。GULP 上の `dev_liquid` はコピー元の名前。
+> テーマ内のアセットパスは常に **`dev/public/assets/`**。GULP 上の `dev_liquid` / `dev_clamp` はコピー元の名前。
 
 ---
 
@@ -210,6 +211,32 @@ theme/                                # WordPress テーマルート
 - `project`（`p-`）：プロジェクト層
 - `utility`（`u-`）：ユーティリティ層
 
+**レイヤー横断禁止（厳守）**
+
+FLOCSS を厳守する。あるレイヤーの SCSS に、別レイヤーのクラスのスタイルを書いてはいけない。
+
+| NG | 理由 |
+|---|---|
+| `.p-section` 内に `.c-button` を書く | `c-` は `component/`、`p-` は `project/` |
+| `.l-inner` 内に `.p-header` を書く | レイアウトとプロジェクトの横断 |
+| `.c-button` 内に `.p-cta` を書く | コンポーネントからプロジェクトを依存させない |
+
+```scss
+// NG — project に component を書く
+.p-section {
+  .c-button {
+    margin-block-start: rm(24);
+  }
+}
+
+// OK — 余白は project 側の要素で取る / 見た目の変更は component 側か修飾子で行う
+.p-section__button {
+  margin-block-start: rm(24);
+}
+```
+
+ボタンの見た目・サイズは `_c-button.scss`（修飾子含む）。ページ固有の配置・余白は `_p-*.scss` の `__` 要素で取る。
+
 **ファイル先頭**
 ```scss
 @use '../global' as *;
@@ -274,6 +301,28 @@ theme/                                # WordPress テーマルート
   ```scss
   width: rm(320);  // カンプの320pxをremに変換
   ```
+
+**`dev_clamp` のとき**
+
+`html` の font-size を vw で動かさない。下の【1】【2】【3】は `dev_liquid` 用。clamp 案件には書かない。固定は `rm()`、可変は `clamp()`。
+
+| 種類 | 書き方 |
+|---|---|
+| 固定 | `rm(24)` |
+| 可変 | `clamp(48, 64, sp)` / `clamp(80, 96, pc)` |
+| 構造変化（列数・並び） | `@include mq(pc)` |
+
+第3引数は範囲。`mq()` の中に書いても自動では切り替わらない。
+
+| 範囲 | 始点 → 終点 |
+|---|---|
+| `sp` | `$sp-camp` → SPインナー |
+| `pc` | 768 → PCインナー |
+| `md` | 550 → 768 |
+| `tb` | 768 → 1024 |
+| `lg` | PCインナー → `$pc-camp` |
+
+基本は `sp` と `pc`。スニペットは `c`。
 
 **ブレークポイント（`_variables.scss`）**
 ```scss

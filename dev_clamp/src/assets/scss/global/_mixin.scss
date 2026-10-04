@@ -1,0 +1,157 @@
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:meta';
+@use './variables' as *;
+@use './function' as *;
+
+// -----------------------------------------------------------
+//  ブレイクポイント
+// -----------------------------------------------------------
+// レスポンシブベース設定（"sp" or "pc"）
+$responsiveBase: sp;
+
+// ブレークポイント定義（variable.scssの値を使用）
+$breakpoints: (
+	sp: $breakpoint - 1,
+	md: $md-breakpoint,
+	pc: $breakpoint,
+	tb: $tb-breakpoint - 1,
+	lg: $pc-inner-sum,
+);
+
+// メディアクエリマップ生成
+$mediaqueries: ();
+
+@if $responsiveBase == sp {
+	// SPファースト（min-width ベース）
+	$mediaqueries: (
+		sp: "(max-width: #{map.get($breakpoints, 'sp')}px)",
+		md: "(min-width: #{map.get($breakpoints, 'md')}px)",
+		pc: "(min-width: #{map.get($breakpoints, 'pc')}px)",
+		tb: "(max-width: #{map.get($breakpoints, 'tb')}px) and (min-width: #{map.get($breakpoints, 'pc')}px)",
+		lg: "(min-width: #{map.get($breakpoints, 'lg')}px)",
+	);
+} @else {
+	// PCファースト（max-width ベース）
+	$mediaqueries: (
+		lg: "(width < #{map.get($breakpoints, 'lg')}px)",
+		tb: "(width < #{map.get($breakpoints, 'tb')}px) and (width >= #{map.get($breakpoints, 'pc')}px)",
+		pc: "(width < #{map.get($breakpoints, 'pc')}px)",
+		md: "(width < #{map.get($breakpoints, 'md')}px)",
+		sp: "(width <= #{map.get($breakpoints, 'sp')}px)",
+	);
+}
+
+// メディアクエリミックスイン（初期値はPC）
+@mixin mq($breakpoint: pc) {
+	@media #{map.get($mediaqueries, $breakpoint)} {
+		@content;
+	}
+}
+
+// 550〜767px だけを狙う mixin。
+// clamp テンプレートでは html の font-size は全幅でブラウザ既定。幅帯の微調整が必要なときだけ使う。
+@mixin mq-sp-fixed {
+	@include mq(md) {
+		@include mq(sp) {
+			@content;
+		}
+	}
+}
+
+// lg（min-width: $pc-inner-sum）… インナー上限幅（1300px〜）
+
+// -----------------------------------------------------------
+//  矢印アイコン（SVG mask）
+// -----------------------------------------------------------
+@function _r($n) {
+	@return math.div(math.round($n * 100), 100);
+}
+
+$_chevron-rotate: (
+	left: 0,
+	up-left: 45,
+	up: 90,
+	up-right: 135,
+	right: 180,
+	down-right: 225,
+	down: 270,
+	down-left: 315,
+);
+
+@function _chevron-rot($direction) {
+	@if meta.type-of($direction) == 'number' {
+		@if math.is-unitless($direction) {
+			@return $direction;
+		} @else if math.unit($direction) == 'deg' {
+			@return math.div($direction, 1deg);
+		} @else {
+			@error "chevron: $direction は deg か単位なしで指定してください";
+		}
+	}
+	@if map.has-key($_chevron-rotate, $direction) {
+		@return map.get($_chevron-rotate, $direction);
+	}
+	@error "chevron: $direction が不正です（指定値: #{$direction}）";
+}
+
+@mixin chevron(
+	$size: rm(24),
+	$thickness: 3,
+	$color: currentColor,
+	$direction: left,
+	$angle: 90
+) {
+	$rot: _chevron-rot($direction);
+	$L: 10;
+	$half: math.div($angle, 2);
+	$dx: _r($L * math.cos($half * 1deg));
+	$dy: _r($L * math.sin($half * 1deg));
+	$ax: _r(12 - math.div($dx, 2));
+	$tx: _r(12 + math.div($dx, 2));
+	$y1: _r(12 - $dy);
+	$y2: _r(12 + $dy);
+
+	$svg: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="#{$thickness}" stroke-linecap="round" stroke-linejoin="round"><g transform="rotate(#{$rot} 12 12)"><path d="M#{$tx},#{$y1} L#{$ax},12 L#{$tx},#{$y2}"/></g></svg>';
+
+	display: inline-block;
+	width: $size;
+	height: $size;
+	background-color: $color;
+	mask-image: url('#{$svg}');
+	mask-repeat: no-repeat;
+	mask-position: center;
+	mask-size: contain;
+	-webkit-mask-image: url('#{$svg}');
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	-webkit-mask-size: contain;
+}
+
+// -----------------------------------------------------------
+//  フォント情報
+// -----------------------------------------------------------
+// 一括指定
+@mixin font($size: null, $weight: null, $height: null, $spacing: null) {
+	@if $size {
+		font-size: rm($size);
+	}
+	@if $weight {
+		font-weight: $weight;
+	}
+	@if $height {
+		line-height: calc($height / $size);
+	}
+	@if $spacing {
+		letter-spacing: calc($spacing / $size * 1em);
+	}
+}
+
+// -----------------------------------------------------------
+//  line-heightの上下の余白（ハーフ・レディング）を打ち消す
+// -----------------------------------------------------------
+$leading-trim: calc((1em - 1lh) / 2);
+
+@supports not (top: 1lh) {
+	$leading-trim: 0px;
+}

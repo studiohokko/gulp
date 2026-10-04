@@ -10,7 +10,8 @@
 
 | フォルダ | 用途 |
 |---|---|
-| `dev_liquid/` | リキッドレイアウト（基本） |
+| `dev_liquid/` | リキッドレイアウト（基本。`html` を vw） |
+| `dev_clamp/` | rem + clamp（固定は `rm()`、可変は `clamp(48, 64, sp)`） |
 | `dev/` | px 固定レイアウト |
 | `wordpress初期設定/` | WP テーマ PHP 雛形 |
 | `prompts/` | Figma / Playwright / alt 属性 等の AI 依頼テンプレート |
