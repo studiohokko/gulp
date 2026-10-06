@@ -28,6 +28,49 @@ const { Transform } = require('stream');
 // 自動生成するSCSSファイルのインデント(タブ3個分。HTML整形の設定に合わせる)
 const SCSS_INDENT = '\t\t\t';
 
+// TinyPNG API の上限は 500MB（Web 版の 5MB 制限とは別）。5MB では切らない。
+// 巨大画像で API が返らないときだけ待ちを打ち切り、次のファイルへ進む。
+const TINYPNG_MAX_BYTES = 500 * 1024 * 1024;
+const IMAGE_TASK_TIMEOUT_MS = 60 * 1000;
+const IMAGE_GLOB = '**/*.{png,jpg,jpeg}';
+
+const withTimeout = (promise, ms, message) => {
+	let settled = false;
+	const pending = Promise.resolve(promise).then(
+		(value) => {
+			settled = true;
+			return value;
+		},
+		(error) => {
+			settled = true;
+			throw error;
+		},
+	);
+	// タイムアウト後に遅れて reject されてもプロセスを落とさない
+	pending.catch(() => {});
+
+	return new Promise((resolve, reject) => {
+		const timer = setTimeout(() => {
+			if (!settled) reject(new Error(message));
+		}, ms);
+		pending.then(
+			(value) => {
+				clearTimeout(timer);
+				resolve(value);
+			},
+			(error) => {
+				clearTimeout(timer);
+				reject(error);
+			},
+		);
+	});
+};
+
+const listImages = (dir) => {
+	if (!fs.existsSync(dir)) return [];
+	return fs.globSync(IMAGE_GLOB, { cwd: dir });
+};
+
 // Vinyl ファイルの contents を非同期に加工する Transform ヘルパー
 // fn が null を返すとそのファイルはストリームから除外される(スキップ)
 const mapAsync = (fn) =>
@@ -237,10 +280,13 @@ const browserReload = (done) => {
 // src 配下の png/jpg を TinyPNG で圧縮して public へ出力する(ソースは変更しない)
 // シグネチャ(ソース内容のmd5)を記録し、内容が変わっていないファイルは
 // API を呼ばずスキップする(一度圧縮した画像は dev/build を再実行しても消費しない)
+// スキップ結果を gulp.dest に流すと、全スキップ時にストリームが完了しないため fs で書く
 tinify.key = process.env.TINYPNG_API_KEY;
 
-const tinyPng = () => {
-	const sigFilePath = './src/assets/img/.tinypng-sigs';
+const tinyPng = async () => {
+	const srcDir = './src/assets/img';
+	const destDir = './public/assets/img';
+	const sigFilePath = path.join(srcDir, '.tinypng-sigs');
 
 	let sigs = {};
 	if (fs.existsSync(sigFilePath)) {
@@ -249,40 +295,46 @@ const tinyPng = () => {
 		} catch {
 			sigs = {};
 		}
-	} else {
+	} else if (fs.existsSync(srcDir)) {
 		fs.writeFileSync(sigFilePath, '{}');
 		console.log('TinyPNG signature file created');
 	}
 
-	return src('./src/assets/img/**/*.{png,jpg,jpeg}', {
-		since: lastRun(tinyPng), // 前回実行以降に変更されたファイルのみ
-		encoding: false,
-	})
-		.pipe(plumber())
-		.pipe(
-			mapAsync(async (file) => {
-				const key = path.relative('./src/assets/img', file.path);
-				const contentHash = crypto.createHash('md5').update(file.contents).digest('hex');
-
-				if (sigs[key] === contentHash) {
-					return null; // 内容変化なし → API を呼ばずスキップ
-				}
-
-				const compressed = await tinify.fromBuffer(file.contents).toBuffer();
-				file.contents = Buffer.from(compressed);
-				sigs[key] = contentHash;
-				console.log(`TinyPNG compressed: ${key}`);
-				return file;
-			}),
-		)
-		.pipe(dest('./public/assets/img'))
-		.on('finish', () => {
-			const next = JSON.stringify(sigs, null, 2);
-			const prev = fs.existsSync(sigFilePath) ? fs.readFileSync(sigFilePath, 'utf8') : '';
-			if (next !== prev) {
-				fs.writeFileSync(sigFilePath, next);
+	for (const rel of listImages(srcDir)) {
+		try {
+			const srcPath = path.join(srcDir, rel);
+			const stat = fs.statSync(srcPath);
+			if (stat.size > TINYPNG_MAX_BYTES) {
+				console.warn(`TinyPNG skipped: ${rel} (exceeds API limit 500MB)`);
+				continue;
 			}
-		});
+
+			const buf = fs.readFileSync(srcPath);
+			const contentHash = crypto.createHash('md5').update(buf).digest('hex');
+			if (sigs[rel] === contentHash) continue;
+
+			const compressed = await withTimeout(
+				tinify.fromBuffer(buf).toBuffer(),
+				IMAGE_TASK_TIMEOUT_MS,
+				`timed out after ${IMAGE_TASK_TIMEOUT_MS}ms`,
+			);
+			const outPath = path.join(destDir, rel);
+			fs.mkdirSync(path.dirname(outPath), { recursive: true });
+			fs.writeFileSync(outPath, Buffer.from(compressed));
+			sigs[rel] = contentHash;
+			console.log(`TinyPNG compressed: ${rel}`);
+		} catch (err) {
+			console.warn(`TinyPNG skipped: ${rel} (${err.message})`);
+		}
+	}
+
+	if (!fs.existsSync(srcDir)) return;
+
+	const next = JSON.stringify(sigs, null, 2);
+	const prev = fs.existsSync(sigFilePath) ? fs.readFileSync(sigFilePath, 'utf8') : '';
+	if (next !== prev) {
+		fs.writeFileSync(sigFilePath, next);
+	}
 };
 
 const copyImages = () => {
@@ -293,49 +345,33 @@ const copyImages = () => {
 		{
 			since: lastRun(copyImages),
 			encoding: false,
+			allowEmpty: true,
 		},
 	).pipe(dest('./public/assets/img'));
 };
 
 // WebP が未生成、または PNG/JPG より古い場合のみ変換する
-const filterWebpTargets = () =>
-	new Transform({
-		objectMode: true,
-		transform(file, _enc, cb) {
-			if (file.isNull()) {
-				cb(null, file);
-				return;
-			}
-			if (file.isStream()) {
-				cb(new Error('Streaming not supported'));
-				return;
-			}
+// スキップを Transform で落とすと dest が完了しないため、対象だけ fs で書く
+const generateWebp = async () => {
+	const dir = './public/assets/img';
 
-			const webpPath = file.path.replace(/\.(png|jpe?g)$/i, '.webp');
-			try {
-				const webpStat = fs.statSync(webpPath);
-				if (webpStat.mtimeMs >= file.stat.mtimeMs) {
-					cb();
-					return;
-				}
-			} catch {
-				// WebP が存在しない
-			}
-			cb(null, file);
-		},
-	});
+	for (const rel of listImages(dir)) {
+		const srcPath = path.join(dir, rel);
+		const webpPath = srcPath.replace(/\.(png|jpe?g)$/i, '.webp');
+		try {
+			const srcStat = fs.statSync(srcPath);
+			if (fs.existsSync(webpPath) && fs.statSync(webpPath).mtimeMs >= srcStat.mtimeMs) continue;
 
-const generateWebp = () => {
-	return src('./public/assets/img/**/*.{png,jpg,jpeg}', { encoding: false })
-		.pipe(filterWebpTargets())
-		.pipe(
-			mapAsync(async (file) => {
-				file.contents = await sharp(file.contents).webp().toBuffer();
-				file.path = file.path.replace(/\.(png|jpe?g)$/i, '.webp');
-				return file;
-			}),
-		)
-		.pipe(dest('public/assets/img'));
+			const output = await withTimeout(
+				sharp(fs.readFileSync(srcPath)).webp().toBuffer(),
+				IMAGE_TASK_TIMEOUT_MS,
+				`timed out after ${IMAGE_TASK_TIMEOUT_MS}ms`,
+			);
+			fs.writeFileSync(webpPath, output);
+		} catch (err) {
+			console.warn(`WebP skipped: ${rel} (${err.message})`);
+		}
+	}
 };
 
 const cacheBusting = () => {
