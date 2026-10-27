@@ -1,22 +1,23 @@
 // -----------------------------------------------------------
 //  スムーススクロール
-//  オフセットは CSS の scroll-padding-top を読み取る
-//  （別ページからの #id 遷移と同じ位置に止めるため）
+//  オフセットは .l-header の実測高さを優先（scroll-padding-top はフォールバック）
+//  （別ページからの #id 遷移と同じ位置に止めるため、CSS の scroll-padding-top も同期）
 //
 //  ⚠️ 【必須】CSS（SCSS）に以下の設定が必要
-//  設定がないとオフセットが 0 になり、見出しがヘッダーに隠れる
+//  設定がないと、JS 無効時や .l-header 未設置時にオフセットが 0 になる
 //
 // html {
-// 	scroll-padding-top: rem($sp-header-height-scrolled);
-
-// 	@include mq(md) {
+// 	scroll-padding-top: rem($sp-header-height-scrolled); // または rm()
+//
+// 	@include mq(md) { // または mq(pc) — 案件の BP に合わせる
 // 		scroll-padding-top: rem($pc-header-height-scrolled);
 // 	}
 // }
 //
 //  ※ scroll-behavior: smooth は書かないこと
 //    （jQuery の animate とぶつかってスクロールがもたつく）
-//  ※ ヘッダー高さを変更するときは CSS 側だけ直せば OK（JS の修正は不要）
+//  ※ Safari（特に fluid rem）は getComputedStyle(scroll-padding-top) が
+//    実ヘッダー高さとズレることがあるため、JS は .l-header を実測する
 // -----------------------------------------------------------
 
 export function js_smooth() {
@@ -38,12 +39,29 @@ export function js_smooth() {
 		}
 	};
 
-	// CSS の scroll-padding-top を取得（ヘッダー分のオフセット）
-	// ※ CSS 未設定だと "auto" → NaN → 0 になる
+	// ヘッダー実高さをオフセットに使う
+	// ※ Safari は fluid rem 下で scroll-padding-top の used 値を誤って返すことがある
 	const getOffset = () => {
+		const header = document.querySelector('.l-header');
+		if (header) {
+			const height = header.getBoundingClientRect().height;
+			if (height > 0) return height;
+		}
 		const value = getComputedStyle(document.documentElement).scrollPaddingTop;
 		return parseFloat(value) || 0;
 	};
+
+	// ネイティブアンカー用にも実高さへ同期（Safari の rem 解決ズレ対策）
+	const syncScrollPadding = () => {
+		const header = document.querySelector('.l-header');
+		if (!header) return;
+		const height = header.getBoundingClientRect().height;
+		if (height > 0) {
+			document.documentElement.style.scrollPaddingTop = `${height}px`;
+		}
+	};
+	syncScrollPadding();
+	window.addEventListener('resize', syncScrollPadding);
 
 	// スクロール位置を取得
 	const getPosition = ($target) => {
@@ -66,6 +84,19 @@ export function js_smooth() {
 			el.setAttribute('tabindex', '-1');
 		}
 		el.focus({ preventScroll: true });
+	};
+
+	// 画面上の実位置でヘッダー直下へ合わせる
+	// ※ iPad Safari は focus({preventScroll:true}) を無視して追加スクロールすることがある
+	const snapToHeader = ($target) => {
+		const el = $target[0];
+		const header = document.querySelector('.l-header');
+		if (!el || el === document.documentElement || !header) return;
+
+		const gap = el.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
+		if (Math.abs(gap) > 2) {
+			window.scrollBy(0, gap);
+		}
 	};
 
 	// イベント委譲（#id も /company/#id も対象）
@@ -93,6 +124,7 @@ export function js_smooth() {
 		if (prefersReducedMotion) {
 			$root.scrollTop(position);
 			moveFocus($target);
+			snapToHeader($target);
 			return;
 		}
 
@@ -107,7 +139,10 @@ export function js_smooth() {
 					$root.scrollTop(corrected);
 				}
 
+				snapToHeader($target);
 				moveFocus($target);
+				snapToHeader($target);
+				requestAnimationFrame(() => snapToHeader($target));
 			});
 	});
 }

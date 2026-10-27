@@ -281,6 +281,21 @@ Web サイトとして現実的に問題になるものを見る。
 - 不要なコメントアウト、不要な開発ファイル、公開してはいけないファイル
 - 本番環境で動かなくなる可能性のある記述
 
+### 9. コーディング規約（このプロジェクト）
+
+実害がなくても、このテンプレートの規約から外れているものは指摘する。重要度は 🟡 Medium を基本とする。
+
+#### 余白
+
+- 要素同士の間隔を `margin-block-end` / `padding-block-end`（または `margin-bottom` / `padding-bottom`）で取っていないか
+- 間隔は次の要素の `margin-block-start` / `padding-block-start` で取るのが正しい
+- セクション・カードなど大枠の内余白に `padding` / `padding-block` を使っているのは問題なし
+
+#### 英字の大文字
+
+- HTML に `THANKS` のように大文字を直書きしていないか
+- 見た目の大文字は HTML を小文字（例: `thanks`）にし、CSS の `text-transform: uppercase` で整える
+
 ---
 
 ## 重要度
@@ -348,6 +363,7 @@ Web サイトとして現実的に問題になるものを見る。
 - WordPress / PHP
 - セキュリティ
 - 納品前チェック
+- コーディング規約（余白の start / 英字の text-transform）
 
 ## 最終判定
 

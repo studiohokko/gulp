@@ -569,17 +569,56 @@ Swiper の `spaceBetween` 等で使用。
 | `border-top` | `border-block-start` |
 | `border-left` | `border-inline-start` |
 
+### 余白の取り方（厳守）
+
+要素同士の間隔は **上側（`*-start`）で取る**。下側（`*-end`）で調整しない。
+
+| 使う | 使わない |
+|---|---|
+| `margin-block-start` | `margin-block-end` |
+| `padding-block-start` | `padding-block-end` |
+
 ```scss
-/* NG */
-.element {
-  padding-top: 2rem;
-  margin-bottom: 1rem;
+/* NG — 前の要素の下で余白を取る */
+.p-section__title {
+  margin-block-end: rm(24);
 }
 
-/* OK */
-.element {
-  padding-block-start: 2rem;
-  margin-block-end: 1rem;
+/* OK — 次の要素の上で余白を取る */
+.p-section__text {
+  margin-block-start: rm(24);
+}
+```
+
+**例外:** セクション・カードなどの大枠の内余白は、`padding` / `padding-block` / `padding-inline` で上下（または四辺）まとめて取ってよい。
+
+```scss
+/* OK — 大枠の内余白 */
+.p-section {
+  padding-block: rm(60) rm(80);
+  padding-inline: rm(20);
+}
+
+.p-card {
+  padding: rm(24);
+}
+```
+
+### 英字の大文字表記
+
+見た目がすべて大文字でも、HTML には小文字（または通常の文）を書き、CSS で整える。
+
+```html
+<!-- OK -->
+<span class="p-section__en">thanks</span>
+
+<!-- NG — HTML に大文字を直書き -->
+<span class="p-section__en">THANKS</span>
+```
+
+```scss
+.p-section__en {
+  text-transform: uppercase;
 }
 ```
 

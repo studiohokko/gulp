@@ -114,6 +114,18 @@ font-size: clamp(32, 44, pc);     // 768 → PCインナー
 | ACF / JS | 基本は手書き。わからない部分だけ AI に依頼 |
 | コーディング規約 | `.cursor/rules/coding-guide.mdc`（AI 向け） |
 
+### 余白・英字（忘れやすい規約）
+
+正本は **`.cursor/rules/coding-guide.mdc`**。要点だけ。
+
+| ルール | 書き方 |
+|---|---|
+| 要素同士の間隔 | `margin-block-start` / `padding-block-start`（**`*-end` は使わない**） |
+| セクション・カードの内余白 | `padding` / `padding-block` でまとめて取ってよい |
+| 見た目が大文字の英字 | HTML は小文字（`thanks`）、CSS で `text-transform: uppercase` |
+
+コードレビュー（「レビューして」）でも、`*-end` での余白と大文字の直書きを見る。
+
 ---
 
 ## Cursor スニペット
