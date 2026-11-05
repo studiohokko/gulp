@@ -456,7 +456,6 @@ $z-drawerIcon: 102;
 **主要 mixin**
 - `@mixin mq($breakpoint)` — メディアクエリ
 - `@mixin font($size, $weight, $height, $spacing)` — フォント一括指定
-- `@mixin chevron(...)` — SVG mask ベースの矢印アイコン
 - `$leading-trim` — line-height 上下余白打ち消し
 
 ---

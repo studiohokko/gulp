@@ -97,27 +97,18 @@
 	line-height: 1.5;
 	transition: opacity $easing;
 
-	&::before,
-	&::after {
+	&::before {
 		display: block;
 		position: absolute;
 		z-index: 3;
 		inset-block-start: 50%;
-		translate: 0 -50%;
-		content: '';
-	}
-
-	&::before {
 		inset-inline-end: rm(23);
+		translate: 0 -50%;
 		width: rm(20);
 		height: rm(20);
 		background: $white;
 		border-radius: 50%;
-	}
-
-	&::after {
-		inset-inline-end: rm(27);
-		@include chevron($size: rm(10), $thickness: 4, $color: $color-main, $direction: right);
+		content: '';
 	}
 }
 

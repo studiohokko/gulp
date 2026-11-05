@@ -1,7 +1,5 @@
 @use '../global' as *;
 
-@use '../global' as *;
-
 @if $responsiveBase == sp {
 	// 📱 SPファースト
 	.u-only__sp {
@@ -21,6 +19,23 @@
 			display: block !important;
 		}
 	}
+
+	// br に display: block が付くと Firefox で空ブロックになり行間が崩れる
+	br.u-only__sp {
+		display: inline;
+
+		@include mq(pc) {
+			display: none !important;
+		}
+	}
+
+	br.u-only__pc {
+		display: none;
+
+		@include mq(pc) {
+			display: inline !important;
+		}
+	}
 } @else {
 	// 💻 PCファースト
 	.u-only__sp {
@@ -36,6 +51,22 @@
 		display: block;
 
 		// SP以下で非表示
+		@include mq(sp) {
+			display: none !important;
+		}
+	}
+
+	br.u-only__sp {
+		display: none;
+
+		@include mq(sp) {
+			display: inline !important;
+		}
+	}
+
+	br.u-only__pc {
+		display: inline;
+
 		@include mq(sp) {
 			display: none !important;
 		}
