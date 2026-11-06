@@ -1,6 +1,13 @@
 @use '../global' as *;
 
 html {
+	scroll-padding-top: rm($sp-header-height);
+
+	// ******** responsive(pc)
+	@include mq(pc) {
+		scroll-padding-top: rm($pc-header-height);
+	}
+
 	// ===========================================================
 	//  リキッドレイアウト（font-size）
 	//  使うパターンだけコメント解除。基本は【1】
@@ -45,6 +52,20 @@ html {
 	// }
 	// @media screen and (max-width: #{px($pc-camp) - 1px}) and (min-width: #{px($breakpoint)}) {
 	// 	font-size: calc(16 / #{$pc-camp} * 100vw);
+	// }
+
+	// -----------------------------------------------------------
+	// 【4】SP / PC ともに途中で固定（min() + インナー幅基準）
+	//  〜549px     SP リキッド
+	//  550〜767px  SP リキッド上限固定（min）
+	//  768〜1299px PC リキッド（$pc-inner-sum 基準）
+	//  1300px〜    16px 固定
+	// -----------------------------------------------------------
+	// @media screen and (max-width: #{px($breakpoint) - 1px}) {
+	// 	font-size: min(calc(16 / #{$sp-camp} * 100vw), calc(16 / #{$sp-camp} * #{$md-breakpoint - 1}px));
+	// }
+	// @media screen and (max-width: #{px($pc-inner-sum) - 1px}) and (min-width: #{px($breakpoint)}) {
+	// 	font-size: calc(16 / #{$pc-inner-sum} * 100vw);
 	// }
 
 	// 1440px 以上もリキッドにする場合（超大画面で拡大し続ける）

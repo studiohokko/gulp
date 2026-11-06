@@ -1,6 +1,12 @@
 @use '../global' as *;
 
 html {
+	scroll-padding-top: rm($sp-header-height);
+
+	// ******** responsive(pc)
+	@include mq(pc) {
+		scroll-padding-top: rm($pc-header-height);
+	}
 }
 
 body {

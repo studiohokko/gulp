@@ -7,6 +7,15 @@
 //  固定値 → rm(24) / 画面幅で連続的に変える値 → clamp(48, 64, sp)
 // ===========================================================
 
+html {
+	scroll-padding-top: rm($sp-header-height);
+
+	// ******** responsive(pc)
+	@include mq(pc) {
+		scroll-padding-top: rm($pc-header-height);
+	}
+}
+
 body {
 	overflow-x: clip;
 	// background-color
