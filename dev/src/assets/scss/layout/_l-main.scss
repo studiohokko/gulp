@@ -3,10 +3,10 @@
 .l-main {
 	overflow: clip;
 	position: relative;
-	// padding-top: rm($sp-header-height);
+	// padding-block-start: rm($sp-header-height);
 
 	// ******** responsive(pc)
 	@include mq(pc) {
-		// padding-top: rm($pc-header-height);
+		// padding-block-start: rm($pc-header-height);
 	}
 }

@@ -101,8 +101,8 @@
 		display: block;
 		position: absolute;
 		z-index: 3;
-		inset-block-start: 50%;
-		inset-inline-end: rm(23);
+		top: 50%;
+		right: rm(23);
 		translate: 0 -50%;
 		width: rm(20);
 		height: rm(20);

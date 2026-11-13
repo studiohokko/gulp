@@ -5,28 +5,33 @@
 	.l-inner {
 		position: relative;
 		width: 100%;
-		max-width: rm($sp-inner-sum);
+		max-width: px($sp-inner-sum);
 		height: inherit;
 		padding: 0 rm($sp-sidePadding);
 		margin-inline: auto;
 
 		// PC以上
 		@include mq(pc) {
-			max-width: rm($pc-inner-sum);
+			max-width: px($pc-inner-sum);
 			padding: 0 rm($pc-sidePadding);
 		}
 
 		// 1300px 以上（PC リキッド終了・固定ゾーン）。必要時のみ @include mq(lg) で上書き
 		// @include mq(lg) { ... }
 
-		&.-narrow {
-			max-width: rm($sp-narrow-inner-sum);
-			padding: 0 rm($sp-sidePadding);
+		// SP だけ狭い。両方なら `l-inner -narrow -spNarrow`（-narrow を後に書いて PC を上書き）
+		&.-spNarrow {
+			max-width: px($sp-narrow-inner-sum);
 
-			// PC以上
 			@include mq(pc) {
-				max-width: rm($pc-narrow-inner-sum);
-				padding: 0 rm($pc-sidePadding);
+				max-width: px($pc-inner-sum);
+			}
+		}
+
+		// PC だけ狭い（いちばん使う）
+		&.-narrow {
+			@include mq(pc) {
+				max-width: px($pc-narrow-inner-sum);
 			}
 		}
 	}
@@ -35,7 +40,7 @@
 	.l-inner {
 		position: relative;
 		width: 100%;
-		max-width: rm($pc-inner-sum);
+		max-width: px($pc-inner-sum);
 		height: inherit;
 		padding: 0 rm($pc-sidePadding);
 		margin-inline: auto;
@@ -45,18 +50,20 @@
 
 		// SP
 		@include mq(sp) {
-			max-width: rm($sp-inner-sum);
+			max-width: px($sp-inner-sum);
 			padding: 0 rm($sp-sidePadding);
 		}
 
-		&.-narrow {
-			max-width: rm($pc-narrow-inner-sum);
-
-			// SP
+		// SP だけ狭い。両方なら `l-inner -narrow -spNarrow`
+		&.-spNarrow {
 			@include mq(sp) {
-				max-width: rm($sp-narrow-inner-sum);
-				padding: 0 rm($sp-sidePadding);
+				max-width: px($sp-narrow-inner-sum);
 			}
+		}
+
+		// PC だけ狭い（いちばん使う）
+		&.-narrow {
+			max-width: px($pc-narrow-inner-sum);
 		}
 	}
 }

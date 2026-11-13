@@ -8,11 +8,11 @@
 // ===========================================================
 
 html {
-	scroll-padding-top: rm($sp-header-height);
+	scroll-padding-block-start: rm($sp-header-height);
 
 	// ******** responsive(pc)
 	@include mq(pc) {
-		scroll-padding-top: rm($pc-header-height);
+		scroll-padding-block-start: rm($pc-header-height);
 	}
 }
 

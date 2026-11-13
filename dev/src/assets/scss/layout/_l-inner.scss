@@ -16,14 +16,19 @@
 			padding: 0 rm($pc-sidePadding);
 		}
 
-		&.-narrow {
-			max-width: rm($sp-inner-sum);
-			padding: 0 rm($sp-sidePadding);
+		// SP だけ狭い。両方なら `l-inner -narrow -spNarrow`（-narrow を後に書いて PC を上書き）
+		&.-spNarrow {
+			max-width: rm($sp-narrow-inner-sum);
 
-			// PC以上
+			@include mq(pc) {
+				max-width: rm($pc-inner-sum);
+			}
+		}
+
+		// PC だけ狭い（いちばん使う）
+		&.-narrow {
 			@include mq(pc) {
 				max-width: rm($pc-narrow-inner-sum);
-				padding: 0 rm($pc-sidePadding);
 			}
 		}
 	}
@@ -43,67 +48,16 @@
 			padding: 0 rm($sp-sidePadding);
 		}
 
+		// SP だけ狭い。両方なら `l-inner -narrow -spNarrow`
+		&.-spNarrow {
+			@include mq(sp) {
+				max-width: rm($sp-narrow-inner-sum);
+			}
+		}
+
+		// PC だけ狭い（いちばん使う）
 		&.-narrow {
 			max-width: rm($pc-narrow-inner-sum);
-
-			// SP
-			@include mq(sp) {
-				max-width: rm($sp-inner-sum);
-				padding: 0 rm($sp-sidePadding);
-			}
 		}
 	}
 }
-
-// .l-inner {
-// 	position: relative;
-// 	width: 100%;
-// 	max-width: px($pc-inner-sum);
-// 	height: inherit;
-// 	padding: 0 rm($pc-sidePadding);
-// 	margin-inline: auto;
-
-// 	// ******** responsive(sp)
-// 	@include mq(sp) {
-// 		width: 100%;
-// 		max-width: px($sp-inner-sum);
-// 		padding: 0 rm($sp-sidePadding);
-// 	}
-// }
-
-// .l-inner__narrow {
-// 	max-width: rm($pc-narrow-inner);
-
-// 	// ******** responsive(sp)
-// 	@include mq(sp) {
-// 		padding: 0 rm($sp-sidePadding);
-// 		max-width: px($sp-inner);
-// 	}
-// }
-
-// .l-inner {
-// 	position: relative;
-// 	width: 100%;
-// 	max-width: rm($pc-inner-sum);
-// 	height: inherit;
-// 	padding: 0 rm($pc-sidePadding);
-// 	margin-inline: auto;
-
-// 	// ******** responsive(sp)
-// 	@include mq(sp) {
-// 		width: 100%;
-// 		max-width: rm($sp-inner-sum);
-// 		padding: 0 rm($sp-sidePadding);
-// 	}
-
-// 	&.-narrow {
-// 		max-width: rm($pc-narrow-inner-sum);
-
-// 		// ******** responsive(sp)
-// 		@include mq(sp) {
-// 			padding: 0 rm($sp-sidePadding);
-// 			// max-width: px($sp-inner);
-// 			max-width: rm($sp-inner-sum);
-// 		}
-// 	}
-// }

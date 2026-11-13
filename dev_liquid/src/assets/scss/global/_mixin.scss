@@ -46,7 +46,7 @@ $mediaqueries: ();
 	}
 }
 
-// SP 固定ゾーン（550〜767px）。html font-size が 16px 固定の幅帯。
+// 550〜767px だけを狙う mixin。【4】では html font-size が 549px 時点で頭打ちの幅帯。
 // mq(md) 単体は min-width: 550px（PC 幅も含む）なので、SP 固定帯だけを狙う場合はこちら。
 @mixin mq-sp-fixed {
 	@include mq(md) {

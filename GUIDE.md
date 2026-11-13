@@ -91,12 +91,12 @@ font-size: clamp(32, 44, pc);     // 768 → PCインナー
 | `http://example.local/` 等 | WordPress（Local をプロキシ） |
 | **空** | LP / 静的 HTML（`public/` を直接配信） |
 
-### リキッドの font-size ゾーン（`dev_liquid` / `_base.scss` 【1】）
+### リキッドの font-size ゾーン（`dev_liquid` / `_base.scss` 【4】）
 
 | 幅 | 状態 |
 |---|---|
 | 〜549px | SP リキッド |
-| 550〜767px | 16px 固定 |
+| 550〜767px | 549px 時点の文字サイズで頭打ち |
 | 768〜1299px | PC リキッド（`$pc-inner-sum` 基準） |
 | 1300px〜 | 16px 固定 |
 
@@ -123,6 +123,7 @@ font-size: clamp(32, 44, pc);     // 768 → PCインナー
 | 要素同士の間隔 | `margin-block-start` / `padding-block-start`（**`*-end` は使わない**） |
 | セクション・カードの内余白 | `padding` / `padding-block` でまとめて取ってよい |
 | 見た目が大文字の英字 | HTML は小文字（`thanks`）、CSS で `text-transform: uppercase` |
+| 移動・拡大・回転 | `translate` / `scale` / `rotate`（`transform:` にはまとめない） |
 
 コードレビュー（「レビューして」）でも、`*-end` での余白と大文字の直書きを見る。
 

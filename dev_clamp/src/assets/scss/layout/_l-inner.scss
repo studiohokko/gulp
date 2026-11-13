@@ -1,6 +1,7 @@
 @use '../global' as *;
 
 // 上限幅・左右余白は固定。幅で連続的に変えるときは clamp()。
+// html を vw で動かさないため max-width は rm() のまま（16px 基準 ≒ px）。
 .l-inner {
 	position: relative;
 	width: 100%;
@@ -13,7 +14,19 @@
 		padding-inline: rm($pc-sidePadding);
 	}
 
+	// SP だけ狭い。両方なら `l-inner -narrow -spNarrow`（-narrow を後に書いて PC を上書き）
+	&.-spNarrow {
+		max-width: rm($sp-narrow-inner-sum);
+
+		@include mq(pc) {
+			max-width: rm($pc-inner-sum);
+		}
+	}
+
+	// PC だけ狭い（いちばん使う）
 	&.-narrow {
-		max-width: rm($pc-narrow-inner-sum);
+		@include mq(pc) {
+			max-width: rm($pc-narrow-inner-sum);
+		}
 	}
 }
